@@ -249,3 +249,5 @@ button.c-item strong{ text-decoration:underline; text-decoration-thickness:1px; 
 .c-row{ grid-template-columns:1fr auto }
 .sheet__nav .btn--grow{ flex:1!important; justify-content:space-between }
 .gc-chip__in{ transform:translate(-50%,-50%) }
+
+.c-text--s{ font-size:15px }

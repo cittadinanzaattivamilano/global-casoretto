@@ -33,7 +33,7 @@ const INTER=['dragging','touchZoom','scrollWheelZoom','doubleClickZoom','boxZoom
 function lock(v){ INTER.forEach(k=>map[k]&&map[k][v?'disable':'enable']()); root.dataset.lock=v?'1':'0'; }
 
 const byId={}; P.forEach((p,i)=>{ p.i=i; byId[p.id]=p; });
-const order=['via-porpora','viale-lombardia','via-teodosio','via-casoretto','piazza-durante','largo-gemito','san-materno','affaccio','cinema'];
+const order=['via-porpora','viale-lombardia','via-teodosio','via-casoretto','piazza-durante','largo-gemito','san-materno','cinema'].filter(i=>byId[i]);
 for(const id of order){ const p=byId[id];
   p.poly=L.polygon(p.dom.map(q=>ll(q[0],q[1])),{color:'#1c44ff',weight:1.5,fillColor:'#1c44ff',fillOpacity:.2,className:'gc-dom',bubblingMouseEvents:false}).addTo(map);
   p.poly.on('click',()=>{ if(cur!==p) select(p.id); }); }
@@ -46,8 +46,8 @@ for(const p of P){
   m.on('click',()=>select(p.id)); hot.addLayer(m); }
 /* feature labels written on the map */
 const chips=L.layerGroup().addTo(map); const chipList=[];
-for(const p of P) p.items.forEach((it,k)=>{ if(!it.chip) return; (it.pts||[]).forEach(pt=>{
-  const m=L.marker(ll(pt[0],pt[1]),{pane:'chips',keyboard:false,icon:L.divIcon({className:'gc-chip',iconSize:null,html:`<span class="gc-chip__in">${esc(it.chip)}</span>`})});
+for(const p of P) p.items.forEach((it,k)=>{ if(!it.chip) return; (it.pts||[]).forEach((pt,pi)=>{ const lab=it.chips?it.chips[pi]:it.chip; if(!lab) return;
+  const m=L.marker(ll(pt[0],pt[1]),{pane:'chips',keyboard:false,icon:L.divIcon({className:'gc-chip',iconSize:null,html:`<span class="gc-chip__in">${esc(lab)}</span>`})});
   m.on('click',()=>{ if(cur!==p) select(p.id,{fly:false}); focusItem(p,k,pt,true); }); m._gc={p,k,pr:it.pr,t:it.title}; chips.addLayer(m); chipList.push(m); }); });
 const streets=L.layerGroup(); const stList=[];
 for(const s of D.streets){ const m=L.marker(ll(s.x,s.y),{pane:'streets',interactive:false,keyboard:false,icon:L.divIcon({className:'gc-st',iconSize:null,
@@ -78,9 +78,12 @@ function cull(){
     const r=el.firstElementChild.getBoundingClientRect(); if(hit(r)) el.classList.add('is-off'); else { el.classList.remove('is-off'); taken.push(r); } }
 }
 map.on('zoomend moveend',refresh);
+let homeZ=-3; map.on('zoomend',()=>{ if(cur&&!flying&&map.getZoom()<=homeZ+0.5) home(); });
+let flying=false; map.on('movestart',e=>{}); 
 function pad(){ if(desk.matches) return {paddingTopLeft:[40,40],paddingBottomRight:[40,40]};
   const h=sheet.getBoundingClientRect().height; return {paddingTopLeft:[12,60],paddingBottomRight:[12,h+12]}; }
 function go(b,o={}){ const opt=Object.assign(pad(),{maxZoom:2.25},o);
+  flying=true; clearTimeout(go.t); go.t=setTimeout(()=>{ flying=false; },1900);
   if(reduce||o.animate===false) map.fitBounds(BB(b),Object.assign(opt,{animate:false})); else map.flyToBounds(BB(b),Object.assign(opt,{duration:1.4,easeLinearity:.2})); }
 const homeB=()=>D.home;
 
@@ -91,7 +94,7 @@ function home(o={}){ cur=null; selK=-1; root.dataset.mode='home'; lock(true); do
   nav.innerHTML=`<p class="c-hint">Tocca una zona sulla mappa per entrare.</p>`;
   $$('[data-go]',card).forEach(b=>b.addEventListener('click',()=>select(b.dataset.go)));
   body.scrollTop=0; if(o.hash!==false) history.replaceState(null,'',location.pathname+location.search);
-  requestAnimationFrame(()=>requestAnimationFrame(()=>{ go(homeB(),{animate:o.animate,maxZoom:0}); refresh(); })); }
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{ go(homeB(),{animate:o.animate,maxZoom:0}); homeZ=map.getBoundsZoom(BB(homeB()),false,L.point(24,24)); refresh(); })); }
 function placeHTML(p){
   const facts=p.facts.map(f=>`<div><dt>${esc(f[0])}</dt><dd>${esc(f[1])}</dd></div>`).join('');
   const items=p.items.map((it,k)=>{ const has=it.pts&&it.pts.length; const inner=`<strong>${esc(it.chip||it.title)}</strong><span class="t">${esc(it.text)}</span>`;
@@ -105,7 +108,8 @@ function placeHTML(p){
 ${p.full?`<div class="c-links"><button class="c-link" data-a="full">Vedi tutta la via ${I.out}</button></div>`:''}
 <h3 class="micro c-sub">Cosa trovi</h3><ul class="c-items">${items}</ul>
 ${fig}
-<h3 class="micro c-sub">Per approfondire</h3><div class="c-links">
+${p.trees?`<h3 class="micro c-sub">Gli alberi</h3><p class="c-text c-text--s">${esc(p.trees.intro)}</p><ul class="c-items">${p.trees.cards.map(t=>`<li><div class="c-item"><strong>${esc(t.title)}</strong><span class="t">${esc(t.text)}</span></div></li>`).join('')}</ul>`:''}
+<h3 class="micro c-sub">Per approfondire</h3><div class="c-links">${p.extra?`<a class="c-link" href="${p.extra.href}"><span>${esc(p.extra.t)}<small>${esc(p.extra.s)}</small></span>${I.next}</a>`:''}
 <a class="c-link" href="${p.id}/"><span>Tavola tecnica<small>Pianta completa, sezione e legenda</small></span>${I.next}</a>
 <a class="c-link" href="${p.pdf}" download><span>Scarica la tavola<small>PDF · ${p.pdfSize}</small></span>${I.dl}</a></div>`; }
 function select(id,o={}){ const p=byId[id]; if(!p) return; cur=p; selK=-1; root.dataset.mode='place'; lock(false);
@@ -130,7 +134,7 @@ $('.menu__close').addEventListener('click',()=>menu.close());
 $('.zb-in')?.addEventListener('click',()=>map.zoomIn()); $('.zb-out')?.addEventListener('click',()=>map.zoomOut());
 $('.brand').addEventListener('click',e=>{ e.preventDefault(); home(); });
 function fitMin(){ map.setMinZoom(Math.max(-3,map.getBoundsZoom(BB([X0,Y0,X1,Y1]),false))); }
-map.fitBounds(BB(homeB()),{animate:false}); fitMin(); setState('domani');
+map.fitBounds(BB(homeB()),{animate:false}); fitMin(); homeZ=map.getBoundsZoom(BB(homeB()),false,L.point(24,24)); setState('domani');
 const h0=location.hash.slice(1); if(byId[h0]) select(h0,{animate:false}); else home({animate:false});
 addEventListener('resize',()=>{ map.invalidateSize(); fitMin(); if(!cur) go(homeB(),{animate:false,maxZoom:0}); });
 addEventListener('hashchange',()=>{ const h=location.hash.slice(1); if(byId[h]&&byId[h]!==cur) select(h); });
