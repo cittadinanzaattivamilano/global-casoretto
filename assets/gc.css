@@ -330,11 +330,6 @@ body{ background:#fff; word-spacing:normal }
 .brand,.rbtn,.btn,.c-link,.c-back,.c-close,.chipl,.badge,.sw,.sw__k,.lg,.lg-btn,.sec-btn,.c-zoom,.toast,.sheet,.gc-hot__in,.gc-chip__in,.c-od__row .micro,.c-item .go,.dots i,.toggle,.toggle button,.toggle::before,.zoom::after,.sheet__handle::before{ border-radius:0!important }
 .micro{ font-size:12px }
 .badge{ width:28px; height:28px; font-family:var(--micro); font-size:12px }
-/* header: project name in Forma DJR Deck, weight makes the hierarchy */
-.brand{ font-family:var(--deck); font-size:22px; letter-spacing:-.01em; gap:.25em }
-.wm-g{ font-family:var(--deck); font-style:normal; font-weight:500 }
-.wm-c{ font-family:var(--deck); font-weight:700 }
-@media (min-width:900px){ .brand{ font-size:26px } }
 /* round buttons become squares with a 1px line */
 .rbtn{ background:#fff; border:1px solid var(--line) }
 .rbtn:hover{ background:var(--tint); color:var(--blue-d) }
@@ -351,11 +346,9 @@ body{ background:#fff; word-spacing:normal }
 .c-link:hover{ background:var(--tint); color:var(--blue-d) }
 .c-back{ min-height:44px; font-size:15px } .c-back:hover{ background:none; text-decoration:underline; text-underline-offset:3px }
 .chipl{ min-height:44px; min-width:44px; padding:0 12px; font-size:15px; font-weight:400; justify-content:center }
-/* type: Display for titles, Deck for lead and tagline, Text for the rest */
+/* type: Display for titles, Publico for the opening line and the taglines, Text for the rest */
 .c-h1{ font-family:var(--display); font-weight:700; font-size:36px; line-height:38px; letter-spacing:-.015em; word-spacing:normal }
-.c-lede{ font-family:var(--deck); font-weight:500; font-size:22px; line-height:28px; margin:12px 0 8px }
 .c-title{ font-family:var(--display); font-weight:700; font-size:32px; line-height:34px; letter-spacing:-.01em; word-spacing:normal }
-.c-tag{ font-family:var(--deck); font-style:normal; font-weight:500; font-size:20px; line-height:26px; margin-top:6px }
 .c-text{ font-size:16px; line-height:24px } .c-text--s{ font-size:15px; line-height:21px }
 .c-item strong{ font-size:16px; line-height:22px } .c-item span.t{ font-size:15px; line-height:21px }
 .c-items li.is-on .c-item{ background:var(--tint); box-shadow:none!important; outline:8px solid var(--tint) }
@@ -368,12 +361,6 @@ body{ background:#fff; word-spacing:normal }
 /* Oggi / Domani as Tags: Oggi with a line, Domani full blue */
 .c-od__row{ font-size:15px; line-height:21px; grid-template-columns:72px 1fr }
 .c-od__row .micro{ height:24px; padding:0 6px; letter-spacing:.08em; border:1px solid var(--line) }
-/* numbers as KPI tiles: tint, 2px white joints, the first one blue */
-.c-facts{ gap:2px; border:0; margin-top:12px }
-.c-facts > div,.c-facts > div + div{ padding:14px; border:0; background:var(--tint) }
-.c-facts > div:first-child{ background:var(--blue); color:#fff }
-.c-facts dt,.c-key .c-facts dt{ font-family:var(--deck); font-weight:700; font-size:26px; line-height:30px }
-.c-facts dd{ margin:2px 0 0; font-size:13px; line-height:18px }
 .c-key section{ padding-top:12px }
 /* figures */
 .c-zoom{ height:44px; padding:0 14px; font-size:15px; font-weight:700; right:0; top:0 }
@@ -407,5 +394,4 @@ body{ background:#fff; word-spacing:normal }
 /* sheet on the phone: square, line on top */
 .sheet{ border-top:1px solid var(--line) }
 .zoom::after{ font-size:13px; padding:8px 12px }
-.c-key .c-facts + p{ margin-top:12px }
 .c-hint{ text-align:left }
