@@ -28,7 +28,7 @@ const base={tileSize:ts,zoomOffset:off,minZoom:-3,maxZoom:3,keepBuffer:3,updateW
 L.tileLayer('tiles/oggi/{z}/{x}/{y}.webp',Object.assign({},base,{maxNativeZoom:5-off,minNativeZoom:Math.max(-3,-off)})).addTo(map);
 new Sparse('tiles/oggi/{z}/{x}/{y}.webp',idx.oggi,Object.assign({},base,{minZoom:6-off-0.5,maxNativeZoom:6-off})).addTo(map);
 new Sparse('tiles/domani/{z}/{x}/{y}.webp',idx.domani,Object.assign({},base,{maxNativeZoom:6-off,minNativeZoom:Math.max(-3,-off),className:'gc-domani'})).addTo(map);
-for(const [n,z] of [['leads',440],['streets',450],['chips',610],['pins',620]]){ map.createPane(n).style.zIndex=z; }
+for(const [n,z] of [['streets',440],['leads',450],['chips',610],['pins',620]]){ map.createPane(n).style.zIndex=z; }
 map.getPane('streets').style.pointerEvents='none'; map.getPane('leads').style.pointerEvents='none';
 const INTER=['dragging','touchZoom','scrollWheelZoom','doubleClickZoom','boxZoom','keyboard'];
 function lock(v){ INTER.forEach(k=>map[k]&&map[k][v?'disable':'enable']()); root.dataset.lock=v?'1':'0'; }
