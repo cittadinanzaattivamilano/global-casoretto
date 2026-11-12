@@ -128,6 +128,7 @@ function focusItem(p,k,pt,fromMap){ const it=p.items[k]; selK=k; setState('doman
 
 /* ---------- menu ---------- */
 const menu=$('#menu');
+$('.lg-btn').addEventListener('click',e=>{ const l=$('#lg'); l.hidden=!l.hidden; e.currentTarget.setAttribute('aria-expanded',!l.hidden); });
 $('.menu-btn').addEventListener('click',()=>{ $('#menu-list').innerHTML=`<ul class="c-list">${P.map(p=>`<li><button class="c-row" data-go="${p.id}"><span><strong>${esc(p.title)}</strong><span class="t">${esc(p.tag)}</span></span>${I.next}</button></li>`).join('')}</ul>`;
   $$('[data-go]',menu).forEach(b=>b.addEventListener('click',()=>{ menu.close(); select(b.dataset.go); })); menu.showModal(); });
 $('.menu__close').addEventListener('click',()=>menu.close());
