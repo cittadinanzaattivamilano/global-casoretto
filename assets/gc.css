@@ -283,3 +283,7 @@ button.c-item strong{ text-decoration:underline; text-decoration-thickness:1px; 
 .c-key .c-facts dt{ font-size:26px }
 .c-key p{ margin:0; font-size:14.5px; line-height:1.45 }
 [data-mode="home"] .sheet{ max-height:52dvh }
+
+.sec-btn{ position:absolute; z-index:25; right:10px; bottom:12px; display:inline-flex; align-items:center; gap:8px; height:40px; padding:0 14px 0 12px; background:var(--blue); color:#fff; border:2px solid #fff; border-radius:999px; font-size:14px; font-weight:700; box-shadow:0 4px 14px rgba(28,68,255,.3) }
+.sec-btn svg{ width:26px; height:16px } .sec-btn[hidden]{ display:none }
+@media (min-width:900px){ .sec-btn{ right:auto; left:50%; transform:translateX(-50%); bottom:auto; top:16px; height:44px; font-size:15px; padding:0 18px 0 14px } }

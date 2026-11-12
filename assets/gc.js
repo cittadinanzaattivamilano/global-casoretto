@@ -94,7 +94,8 @@ function go(b,o={}){ const opt=Object.assign(pad(),{maxZoom:2.25},o);
 const homeB=()=>D.home;
 
 /* ---------- cards ---------- */
-function home(o={}){ free(); cur=null; selK=-1; root.dataset.mode='home'; lock(true); document.title='Global Casoretto · come potrebbe cambiare il quartiere';
+function openZoom(src){ const d=$('#zoom'), im=$('img',d); im.src=src; im.classList.remove('is-big'); d.showModal(); history.pushState({gcZoom:1},'',location.href); }
+function home(o={}){ free(); $('.sec-btn').hidden=true; cur=null; selK=-1; root.dataset.mode='home'; lock(true); document.title='Global Casoretto · come potrebbe cambiare il quartiere';
   card.innerHTML=`<p class="micro c-kick">Una visione per il quartiere · Milano, Municipio 3</p><h1 class="c-h1">${esc(D.intro.t)}</h1><p class="c-lede">${esc(D.intro.p)}</p>
 <div class="c-key">
 <section><h2 class="micro">Più alberi</h2><dl class="c-facts" style="--n:2"><div><dt>370</dt><dd>nuovi alberi (stima)</dd></div><div><dt>580+</dt><dd>alberi esistenti conservati</dd></div></dl>
@@ -127,7 +128,8 @@ ${p.trees?`<h3 class="micro c-sub">Gli alberi</h3><p class="c-text c-text--s">${
 function select(id,o={}){ const p=byId[id]; if(!p) return; free(); cur=p; selK=-1; root.dataset.mode='place'; lock(false);
   card.innerHTML=placeHTML(p); const nx=P[(p.i+1)%N];
   nav.innerHTML=`<button class="btn btn--ghost" data-a="home" aria-label="Torna alla visione d'insieme">${I.out}<span>Insieme</span></button><button class="btn btn--grow" data-a="next"><span class="nx"><small>Prossimo</small>${esc(nx.name)}</span>${I.next}</button>`;
-  $$('.c-zoom',card).forEach(z=>z.addEventListener('click',()=>{ const d=$('#zoom'), im=$('img',d); im.src=z.dataset.full; im.classList.remove('is-big'); d.showModal(); history.pushState({gcZoom:1},'',location.href); }));
+  $$('.c-zoom',card).forEach(z=>z.addEventListener('click',()=>openZoom(z.dataset.full)));
+  const sb=$('.sec-btn'); sb.hidden=!p.sec; if(p.sec) sb.onclick=()=>openZoom(p.sec.full);
   $$('button.c-item',card).forEach(b=>b.addEventListener('click',()=>focusItem(p,+b.dataset.k)));
   const fb=$('[data-a="full"]',card); if(fb) fb.onclick=()=>go(p.full,{maxZoom:1});
   $('[data-a="home"]',nav).onclick=()=>home(); $('[data-a="next"]',nav).onclick=()=>select(nx.id);
