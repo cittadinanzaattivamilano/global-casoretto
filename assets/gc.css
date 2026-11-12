@@ -258,3 +258,11 @@ button.c-item strong{ text-decoration:underline; text-decoration-thickness:1px; 
 .lg i{ width:16px; height:12px; flex-shrink:0; display:inline-block } .lg i.c{ width:14px; height:14px; border-radius:50% }
 [data-mode="home"] .lg-btn,[data-mode="home"] .lg{ display:none }
 @media (min-width:900px){ .lg-btn{ left:16px; top:58px; height:34px; font-size:13.5px } .lg{ left:16px; top:100px; font-size:13.5px } }
+
+.gc-chip--l .gc-chip__in{ transform:translate(-2px,-50%) } .gc-chip--r .gc-chip__in{ transform:translate(calc(-100% + 2px),-50%) }
+.c-sketch{ position:relative } .c-zoom{ position:absolute; right:8px; top:8px; height:32px; padding:0 12px; background:var(--blue); color:#fff; border:0; border-radius:999px; font-size:12.5px; font-weight:700 }
+.zoom{ position:fixed; inset:0; width:100%; height:100%; max-width:none; max-height:none; margin:0; padding:0; border:0; background:#fff }
+.zoom__x{ position:fixed; right:12px; top:max(12px,env(safe-area-inset-top)); z-index:2 }
+.zoom__vp{ width:100%; height:100%; overflow:auto; display:flex; -webkit-overflow-scrolling:touch }
+.zoom__vp img{ margin:auto; display:block; max-width:100%; max-height:100%; width:auto; height:auto; cursor:zoom-in }
+.zoom__vp img.is-big{ max-width:none; max-height:none; width:max(220vw,1600px); cursor:zoom-out }

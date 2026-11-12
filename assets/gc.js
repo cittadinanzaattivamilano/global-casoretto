@@ -48,6 +48,8 @@ for(const p of P){
 const chips=L.layerGroup().addTo(map); const chipList=[];
 for(const p of P) p.items.forEach((it,k)=>{ if(!it.chip) return; (it.pts||[]).forEach((pt,pi)=>{ const lab=it.chips?it.chips[pi]:it.chip; if(!lab) return;
   const m=L.marker(ll(pt[0],pt[1]),{pane:'chips',keyboard:false,icon:L.divIcon({className:'gc-chip',iconSize:null,html:`<span class="gc-chip__in">${esc(lab)}</span>`})});
+  const tg=(pt[2]||[]).filter(t=>Math.hypot(t[0]-pt[0],t[1]-pt[1])>2); m._ld=[]; if(tg.length){ const dx=tg.reduce((a,t)=>a+t[0],0)/tg.length-pt[0]; m.options.icon.options.className='gc-chip '+(dx<0?'gc-chip--l':'gc-chip--r');
+    for(const t of tg){ m._ld.push(L.polyline([ll(pt[0],pt[1]),ll(t[0],t[1])],{pane:'leads',color:'#1c44ff',weight:1.2,interactive:false,opacity:0})); m._ld.push(L.circleMarker(ll(t[0],t[1]),{pane:'leads',radius:2.6,color:'#fff',weight:1,fillColor:'#1c44ff',fillOpacity:0,opacity:0,interactive:false})); } }
   m.on('click',()=>{ if(cur!==p) select(p.id,{fly:false}); focusItem(p,k,pt,true); }); m._gc={p,k,pr:it.pr,t:it.title}; chips.addLayer(m); chipList.push(m); }); });
 const streets=L.layerGroup(); const stList=[];
 for(const s of D.streets){ const m=L.marker(ll(s.x,s.y),{pane:'streets',interactive:false,keyboard:false,icon:L.divIcon({className:'gc-st',iconSize:null,
@@ -70,9 +72,10 @@ function cull(){
   if(!cur) $$('.gc-hot__in').forEach(e=>taken.push(e.getBoundingClientRect()));
   const mine=m=>m._gc.p===cur||!!(cur&&cur.borrow&&m._gc.p.id===cur.borrow.frm&&cur.borrow.titles.includes(m._gc.t));
   const pr=m=>(m._gc.p===cur&&m._gc.k===selK?0:mine(m)?1:2);
-  for(const m of [...chipList].sort((a,c)=>pr(a)-pr(c)||a._gc.pr-c._gc.pr)){ const el=m.getElement(); if(!el) continue; const sel=pr(m)===0; el.classList.toggle('is-sel',sel);
-    if(!cur||!(z>=0.7||mine(m))||!b.contains(m.getLatLng())){ el.classList.add('is-off'); continue; }
-    const r=el.firstElementChild.getBoundingClientRect(); if(hit(r)&&!sel) el.classList.add('is-off'); else { el.classList.remove('is-off'); taken.push(r); } }
+  for(const m of [...chipList].sort((a,c)=>pr(a)-pr(c)||a._gc.pr-c._gc.pr)){ const el=m.getElement(); if(!el) continue; const sel=pr(m)===0; el.classList.toggle('is-sel',sel); let on=true;
+    if(!cur||!(z>=0.7||mine(m))||!b.contains(m.getLatLng())) on=false;
+    else { const r=el.firstElementChild.getBoundingClientRect(); if(hit(r)&&!sel) on=false; else taken.push(r); }
+    el.classList.toggle('is-off',!on); m._ld.forEach(x=>x.setStyle({opacity:on?1:0,fillOpacity:on&&x instanceof L.CircleMarker?1:0})); }
   if(map.hasLayer(streets)) for(const m of stList){ const el=m.getElement(); if(!el) continue; const need=m._len>=900?-1.4:m._len>=350?-0.8:m._len>=160?0:0.6;
     if(z<need||!b.contains(m.getLatLng())){ el.classList.add('is-off'); continue; }
     const r=el.firstElementChild.getBoundingClientRect(); if(hit(r)) el.classList.add('is-off'); else { el.classList.remove('is-off'); taken.push(r); } }
@@ -99,8 +102,8 @@ function placeHTML(p){
   const facts=p.facts.map(f=>`<div><dt>${esc(f[0])}</dt><dd>${esc(f[1])}</dd></div>`).join('');
   const items=p.items.map((it,k)=>{ const has=it.pts&&it.pts.length; const inner=`<strong>${esc(it.chip||it.title)}</strong><span class="t">${esc(it.text)}</span>`;
     return `<li id="it-${k}">${has?`<button class="c-item" data-k="${k}" aria-label="${esc(it.chip||it.title)}: mostra sulla mappa">${inner}</button>`:`<div class="c-item">${inner}</div>`}</li>`; }).join('');
-  const fig=p.sec?`<figure class="c-sketch"><img src="${p.sec.src}" width="${p.sec.w}" height="${p.sec.h}" alt="Sezione della strada, oggi e con il progetto" loading="lazy"><figcaption>La sezione della strada: oggi e con il progetto</figcaption></figure>`
-    :p.sketch?`<figure class="c-sketch"><img src="${p.sketch.src}" width="${p.sketch.w}" height="${p.sketch.h}" alt="Disegno: ${esc(p.sketch.cap)}" loading="lazy"><figcaption>${esc(p.sketch.cap)}</figcaption></figure>`:'';
+  const fig=p.sec?`<figure class="c-sketch"><img src="${p.sec.src}" width="${p.sec.w}" height="${p.sec.h}" alt="Sezione della strada, oggi e con il progetto" loading="lazy"><button class="c-zoom" type="button" data-full="${p.sec.full}">Apri a schermo intero</button><figcaption>La sezione della strada: oggi e con il progetto</figcaption></figure>`
+    :p.sketch?`<figure class="c-sketch"><img src="${p.sketch.src}" width="${p.sketch.w}" height="${p.sketch.h}" alt="Disegno: ${esc(p.sketch.cap)}" loading="lazy"><button class="c-zoom" type="button" data-full="${p.sketch.full}">Apri a schermo intero</button><figcaption>${esc(p.sketch.cap)}</figcaption></figure>`:'';
   return `<p class="micro c-kick">${esc(p.cat)} · ${p.i+1} di ${N}</p>
 <h2 class="c-title">${esc(p.title)}</h2><p class="c-tag">${esc(p.tag)}</p>
 <div class="c-od"><div class="c-od__row"><span class="micro">Oggi</span><span>${esc(p.oggi)}</span></div><div class="c-od__row"><span class="micro">Domani</span><span>${esc(p.domani)}</span></div></div>
@@ -115,6 +118,7 @@ ${p.trees?`<h3 class="micro c-sub">Gli alberi</h3><p class="c-text c-text--s">${
 function select(id,o={}){ const p=byId[id]; if(!p) return; cur=p; selK=-1; root.dataset.mode='place'; lock(false);
   card.innerHTML=placeHTML(p); const nx=P[(p.i+1)%N];
   nav.innerHTML=`<button class="btn btn--ghost" data-a="home" aria-label="Torna alla visione d'insieme">${I.out}<span>Insieme</span></button><button class="btn btn--grow" data-a="next"><span class="nx"><small>Prossimo</small>${esc(nx.name)}</span>${I.next}</button>`;
+  $$('.c-zoom',card).forEach(z=>z.addEventListener('click',()=>{ const d=$('#zoom'), im=$('img',d); im.src=z.dataset.full; im.classList.remove('is-big'); d.showModal(); }));
   $$('button.c-item',card).forEach(b=>b.addEventListener('click',()=>focusItem(p,+b.dataset.k)));
   const fb=$('[data-a="full"]',card); if(fb) fb.onclick=()=>go(p.full,{maxZoom:1});
   $('[data-a="home"]',nav).onclick=()=>home(); $('[data-a="next"]',nav).onclick=()=>select(nx.id);
@@ -127,6 +131,7 @@ function focusItem(p,k,pt,fromMap){ const it=p.items[k]; selK=k; setState('doman
   requestAnimationFrame(cull); }
 
 /* ---------- menu ---------- */
+$('.zoom__x').addEventListener('click',()=>$('#zoom').close()); $('#zoom img').addEventListener('click',e=>e.currentTarget.classList.toggle('is-big'));
 const menu=$('#menu');
 $('.lg-btn').addEventListener('click',e=>{ const l=$('#lg'); l.hidden=!l.hidden; e.currentTarget.setAttribute('aria-expanded',!l.hidden); });
 $('.menu-btn').addEventListener('click',()=>{ $('#menu-list').innerHTML=`<ul class="c-list">${P.map(p=>`<li><button class="c-row" data-go="${p.id}"><span><strong>${esc(p.title)}</strong><span class="t">${esc(p.tag)}</span></span>${I.next}</button></li>`).join('')}</ul>`;
@@ -135,7 +140,7 @@ $('.menu__close').addEventListener('click',()=>menu.close());
 $('.zb-in')?.addEventListener('click',()=>map.zoomIn()); $('.zb-out')?.addEventListener('click',()=>map.zoomOut());
 $('.brand').addEventListener('click',e=>{ e.preventDefault(); home(); });
 function fitMin(){ map.setMinZoom(Math.max(-3,map.getBoundsZoom(BB([X0,Y0,X1,Y1]),false))); }
-map.fitBounds(BB(homeB()),{animate:false}); fitMin(); homeZ=map.getBoundsZoom(BB(homeB()),false,L.point(24,24)); setState('domani');
+map.fitBounds(BB(homeB()),{animate:false}); fitMin(); chipList.forEach(m=>m._ld.forEach(x=>x.addTo(map))); homeZ=map.getBoundsZoom(BB(homeB()),false,L.point(24,24)); setState('domani');
 const h0=location.hash.slice(1); if(byId[h0]) select(h0,{animate:false}); else home({animate:false});
 addEventListener('resize',()=>{ map.invalidateSize(); fitMin(); if(!cur) go(homeB(),{animate:false,maxZoom:0}); });
 addEventListener('hashchange',()=>{ const h=location.hash.slice(1); if(byId[h]&&byId[h]!==cur) select(h); });
