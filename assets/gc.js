@@ -40,7 +40,7 @@ for(const id of order){ const p=byId[id];
   p.poly.on('click',()=>{ if(cur!==p) select(p.id); }); }
 /* hotspot labels of the overview (with a leader to the place) */
 const hot=L.layerGroup().addTo(map);
-for(const p of P){
+for(const p of P){ if(!desk.matches&&p.labm) p.lab=p.labm;
   if(Math.hypot(p.lab[0]-p.anchor[0],p.lab[1]-p.anchor[1])>30){ hot.addLayer(L.polyline([ll(p.lab[0],p.lab[1]),ll(p.anchor[0],p.anchor[1])],{pane:'leads',color:'#1c44ff',weight:1.5,interactive:false}));
     hot.addLayer(L.circleMarker(ll(p.anchor[0],p.anchor[1]),{pane:'leads',radius:3.5,color:'#1c44ff',fillColor:'#1c44ff',fillOpacity:1,weight:0,interactive:false})); }
   const m=L.marker(ll(p.lab[0],p.lab[1]),{pane:'pins',keyboard:false,icon:L.divIcon({className:'gc-hot',iconSize:null,html:`<button class="gc-hot__in" type="button">${esc(p.name)}</button>`})});
