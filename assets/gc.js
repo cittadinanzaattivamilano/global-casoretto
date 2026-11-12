@@ -14,6 +14,7 @@ const I={
 /* ---------- map ---------- */
 const ll=(x,y)=>L.latLng(-(y-Y0),x-X0);
 const BB=b=>L.latLngBounds(ll(b[0],b[3]),ll(b[2],b[1]));
+const ul=l=>[l.lng+X0,Y0-l.lat];
 const map=L.map('map',{crs:L.CRS.Simple,minZoom:-3,maxZoom:3,zoomSnap:0.25,zoomDelta:0.75,wheelPxPerZoomLevel:90,zoomControl:false,attributionControl:false,
   maxBounds:BB([X0,Y0,X1,Y1]),maxBoundsViscosity:0.9,bounceAtZoomLimits:false});
 const retina=L.Browser.retina, off=retina?4:3, ts=retina?128:256; $('#map').style.setProperty('--ts',ts+'px');
@@ -44,6 +45,26 @@ for(const p of P){
     hot.addLayer(L.circleMarker(ll(p.anchor[0],p.anchor[1]),{pane:'leads',radius:3.5,color:'#1c44ff',fillColor:'#1c44ff',fillOpacity:1,weight:0,interactive:false})); }
   const m=L.marker(ll(p.lab[0],p.lab[1]),{pane:'pins',keyboard:false,icon:L.divIcon({className:'gc-hot',iconSize:null,html:`<button class="gc-hot__in" type="button">${esc(p.name)}</button>`})});
   m.on('click',()=>select(p.id)); hot.addLayer(m); }
+/* in a place: the other places stay visible as hotspots (blue area + name), a click moves there */
+const near=L.layerGroup().addTo(map);
+for(const p of P){ p.near=L.marker(ll(p.anchor[0],p.anchor[1]),{pane:'pins',keyboard:false,icon:L.divIcon({className:'gc-hot gc-hot--near',iconSize:null,html:`<button class="gc-hot__in" type="button">${esc(p.name)}</button>`})});
+  p.near.on('click',()=>select(p.id)); }
+function clipPoly(pts,r){ const E=[[0,r[0],1],[0,r[2],-1],[1,r[1],1],[1,r[3],-1]]; let o=pts;
+  for(const [ax,v,sg] of E){ const inp=o; o=[]; const ins=q=>sg*(q[ax]-v)>=0;
+    for(let i=0;i<inp.length;i++){ const a=inp[i], c=inp[(i+1)%inp.length], ia=ins(a), ic=ins(c);
+      if(ia) o.push(a); if(ia!==ic){ const t=(v-a[ax])/(c[ax]-a[ax]); o.push([a[0]+t*(c[0]-a[0]),a[1]+t*(c[1]-a[1])]); } }
+    if(o.length<3) return null; }
+  return o; }
+function centroid(o){ let A=0,cx=0,cy=0; for(let i=0;i<o.length;i++){ const a=o[i], c=o[(i+1)%o.length], k=a[0]*c[1]-c[0]*a[1]; A+=k; cx+=(a[0]+c[0])*k; cy+=(a[1]+c[1])*k; }
+  return Math.abs(A)<1e-6?null:[cx/(3*A),cy/(3*A),Math.abs(A)/2]; }
+function nearUpdate(){ if(!cur){ near.clearLayers(); return; }
+  const sz=map.getSize(), mxp=Math.min(70,sz.x*0.18), myp=28;
+  const a=map.containerPointToLatLng([mxp,myp+(desk.matches?0:70)]), c=map.containerPointToLatLng([sz.x-mxp,sz.y-myp]);
+  const pa=ul(a), pc=ul(c), r=[Math.min(pa[0],pc[0]),Math.min(pa[1],pc[1]),Math.max(pa[0],pc[0]),Math.max(pa[1],pc[1])];
+  const px=Math.abs(map.latLngToContainerPoint(ll(1,0)).x-map.latLngToContainerPoint(ll(0,0)).x);
+  for(const p of P){ let ok=false; if(p!==cur&&!(cur.borrow&&cur.borrow.frm===p.id)){ const o=clipPoly(p.dom,r), g=o&&centroid(o);
+      if(g&&g[2]*px*px>1400){ p.near.setLatLng(ll(g[0],g[1])); ok=true; } }
+    if(ok){ if(!near.hasLayer(p.near)) near.addLayer(p.near); } else if(near.hasLayer(p.near)) near.removeLayer(p.near); } }
 /* feature labels written on the map */
 const chips=L.layerGroup().addTo(map); const chipList=[];
 for(const p of P) p.items.forEach((it,k)=>{ if(!it.chip) return; (it.pts||[]).forEach((pt,pi)=>{ const lab=it.chips?it.chips[pi]:it.chip; if(!lab) return;
@@ -62,7 +83,8 @@ function setState(s){ state=s; root.dataset.state=s; const sw=$('.sw'); sw.setAt
 $('.sw').addEventListener('click',()=>setState(state==='oggi'?'domani':'oggi'));
 function refresh(){
   const z=map.getZoom(), home=!cur; root.dataset.tier=z<0.7?'mid':'near';
-  for(const p of P){ p.poly.setStyle(home||(p.label&&p===cur)?{opacity:.9,fillOpacity:.22,weight:1.5}:{opacity:0,fillOpacity:0,weight:1.5}); }
+  for(const p of P){ p.poly.setStyle(home||(p.label&&p===cur)?{opacity:.9,fillOpacity:.22,weight:1.5}:p!==cur?{opacity:.75,fillOpacity:.18,weight:1.5}:{opacity:0,fillOpacity:0,weight:1.5}); }
+  nearUpdate();
   if(home){ if(!map.hasLayer(hot)) hot.addTo(map); } else if(map.hasLayer(hot)) map.removeLayer(hot);
   if(z>=-1.4){ if(!map.hasLayer(streets)) streets.addTo(map); } else if(map.hasLayer(streets)) map.removeLayer(streets);
   requestAnimationFrame(cull);
@@ -70,11 +92,11 @@ function refresh(){
 function cull(){
   const z=map.getZoom(), b=map.getBounds().pad(0.05), taken=[];
   const hit=r=>taken.some(q=>!(r.right<q.left-3||r.left>q.right+3||r.bottom<q.top-1||r.top>q.bottom+1));
-  if(!cur) $$('.gc-hot__in').forEach(e=>taken.push(e.getBoundingClientRect()));
+  $$('.gc-hot__in').forEach(e=>taken.push(e.getBoundingClientRect()));
   const mine=m=>m._gc.p===cur||!!(cur&&cur.borrow&&m._gc.p.id===cur.borrow.frm&&cur.borrow.titles.includes(m._gc.t));
   const pr=m=>(m._gc.p===cur&&m._gc.k===selK?0:mine(m)?1:2);
   for(const m of [...chipList].sort((a,c)=>pr(a)-pr(c)||a._gc.pr-c._gc.pr)){ const el=m.getElement(); if(!el) continue; const sel=pr(m)===0; el.classList.toggle('is-sel',sel); let on=state!=='oggi';
-    if(!on||!cur||!(z>=0.7||mine(m))||!b.contains(m.getLatLng())) on=false;
+    if(!on||!cur||!mine(m)||!b.contains(m.getLatLng())) on=false;
     else { const r=el.firstElementChild.getBoundingClientRect(); if(hit(r)&&!sel) on=false; else taken.push(r); }
     el.classList.toggle('is-off',!on); m._ld.forEach(x=>x.setStyle({opacity:on?1:0,fillOpacity:on&&x instanceof L.CircleMarker?1:0})); }
   if(map.hasLayer(streets)) for(const m of stList){ const el=m.getElement(); if(!el) continue; const need=m._len>=900?-1.4:m._len>=350?-0.8:m._len>=160?0:0.6;
@@ -132,7 +154,7 @@ function select(id,o={}){ const p=byId[id]; if(!p) return; free(); cur=p; selK=-
   $('[data-a="home2"]',card).onclick=()=>home();
   $$('.c-zoom',card).forEach(z=>z.addEventListener('click',()=>openZoom(z.dataset.full)));
   $('.x-btn').hidden=false;
-  const sb=$('.sec-btn'); sb.hidden=!p.sec; if(p.sec) sb.onclick=()=>openZoom(p.sec.full);
+  const sb=$('.sec-btn'); sb.hidden=!p.sec||p.id==='largo-gemito'; if(p.sec) sb.onclick=()=>openZoom(p.sec.full);
   $$('button.c-item',card).forEach(b=>b.addEventListener('click',()=>focusItem(p,+b.dataset.k)));
   const fb=$('[data-a="full"]',card); if(fb) fb.onclick=()=>go(p.full,{maxZoom:1});
   $('[data-a="home"]',nav).onclick=()=>home(); $('[data-a="next"]',nav).onclick=()=>select(nx.id);

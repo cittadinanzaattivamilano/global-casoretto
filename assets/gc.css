@@ -294,3 +294,6 @@ button.c-item strong{ text-decoration:underline; text-decoration-thickness:1px; 
 .x-btn{ position:absolute; z-index:26; right:10px; top:calc(max(10px,env(safe-area-inset-top)) + 54px); background:var(--blue); color:#fff; border-color:#fff; box-shadow:0 3px 10px rgba(28,68,255,.3) }
 .x-btn:hover{ background:var(--blue-d) } .x-btn[hidden]{ display:none }
 @media (min-width:900px){ .x-btn{ top:16px; right:18px } }
+
+/* neighbouring places while inside a place */
+.gc-hot--near .gc-hot__in{ height:27px; padding:0 11px; font-size:12.5px; box-shadow:0 2px 8px rgba(28,68,255,.28) }
