@@ -71,7 +71,9 @@ function nearUpdate(){ if(!cur){ near.clearLayers(); return; }
   const px=Math.abs(map.latLngToContainerPoint(ll(1,0)).x-map.latLngToContainerPoint(ll(0,0)).x);
   for(const p of P){ let ok=false; if(p!==cur&&!(cur.borrow&&cur.borrow.frm===p.id)){ const o=clipPoly(p.dom,r), g=o&&centroid(o);
       if(g&&g[2]*px*px>1400){ p.near.setLatLng(ll(g[0],g[1])); ok=true; } }
-    if(ok){ if(!near.hasLayer(p.near)) near.addLayer(p.near); } else if(near.hasLayer(p.near)) near.removeLayer(p.near); } }
+    if(ok){ if(!near.hasLayer(p.near)) near.addLayer(p.near); } else if(near.hasLayer(p.near)) near.removeLayer(p.near); }
+  requestAnimationFrame(()=>{ const seen=[]; for(const p of P){ if(!near.hasLayer(p.near)) continue; const el=p.near.getElement(); if(!el) continue; const b=el.firstElementChild; b.style.visibility='';
+    const r=b.getBoundingClientRect(); if(seen.some(q=>!(r.right<q.left-4||r.left>q.right+4||r.bottom<q.top-2||r.top>q.bottom+2))) b.style.visibility='hidden'; else seen.push(r); } }); }
 /* feature labels written on the map */
 const chips=L.layerGroup().addTo(map); const chipList=[];
 for(const p of P) p.items.forEach((it,k)=>{ if(!it.chip) return; (it.pts||[]).forEach((pt,pi)=>{ const lab=it.chips?it.chips[pi]:it.chip; if(!lab) return;
@@ -128,13 +130,13 @@ function openZoom(src){ const d=$('#zoom'), im=$('img',d); im.src=src; im.classL
 function home(o={}){ free(); if(!desk.matches&&state!=='domani') setState('domani'); $('.sec-btn').hidden=true; $('.x-btn').hidden=true; cur=null; selK=-1; root.dataset.mode='home'; lock(true); document.title='Global Casoretto · come potrebbe cambiare il quartiere';
   card.innerHTML=`<p class="micro c-kick">Una visione per il quartiere · Milano, Municipio 3</p><h1 class="c-h1">${esc(D.intro.t)}</h1><p class="c-lede">${esc(D.intro.p)}</p>
 <div class="c-key">
-<section><h2 class="micro">Più alberi</h2><dl class="c-facts" style="--n:2"><div><dt>380</dt><dd>nuovi alberi (stima)</dd></div><div><dt>580+</dt><dd>alberi esistenti conservati</dd></div></dl>
-<p>Nessun albero dei viali viene tolto. Via Porpora, oggi senza alberi lungo la strada, ne riceve circa 190; via Casoretto diventa un filare continuo.</p></section>
+<section><h2 class="micro">Più alberi</h2><dl class="c-facts" style="--n:2"><div><dt>380</dt><dd>nuovi alberi, circa</dd></div><div><dt>600</dt><dd>alberi che ci sono già, tutti conservati</dd></div></dl>
+<p>Nessun albero viene tolto. Via Porpora, oggi senza alberi lungo la strada, ne riceve circa 190; via Casoretto diventa un filare continuo da piazza Durante alla ferrovia.</p></section>
 <section><h2 class="micro">Più sicurezza</h2><dl class="c-facts" style="--n:2"><div><dt>4 km</dt><dd>di strade a 30 km/h o meno</dd></div><div><dt>5</dt><dd>nuovi semafori pedonali</dd></div></dl>
-<p>Ciclabili protette su ogni via ridisegnata, marciapiedi liberi dalle auto, incroci rialzati, due piazze senza traffico.</p></section>
+<p>Ciclabili protette su ogni via ridisegnata, marciapiedi liberi dalle auto, incroci rialzati e tre nuove piazze senza auto.</p></section>
 </div>
 <ul class="c-list c-list--home">${P.map(p=>`<li><button class="c-row" data-go="${p.id}"><span><strong>${esc(p.title)}</strong><span class="t">${esc(p.tag)}</span></span>${I.next}</button></li>`).join('')}</ul>`;
-  nav.innerHTML=`<p class="c-hint">Tocca una zona sulla mappa per entrare.</p>`;
+  nav.innerHTML=`<p class="c-hint">Scegli una zona sulla mappa per vedere come cambia.</p>`;
   $$('[data-go]',card).forEach(b=>b.addEventListener('click',()=>select(b.dataset.go)));
   body.scrollTop=0; if(o.hash!==false) history.replaceState(null,'',location.pathname+location.search);
   requestAnimationFrame(()=>requestAnimationFrame(()=>{ map.invalidateSize(false); go(homeB(),{animate:o.animate,maxZoom:0}); homeZ=map.getBoundsZoom(BB(homeB()),false,L.point(24,24)); refresh(); })); }
