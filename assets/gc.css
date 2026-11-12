@@ -312,3 +312,6 @@ button.c-item strong{ text-decoration:underline; text-decoration-thickness:1px; 
  [data-mode] .gc-hot--txt.gc-hot--r .gc-hot__in{ transform:translate(0,-50%) }
  [data-mode] .gc-hot--txt.gc-hot--l .gc-hot__in{ transform:translate(-100%,-50%) }
 }
+
+/* overview: no today/tomorrow switch */
+[data-mode="home"] .sw{ display:none!important }
