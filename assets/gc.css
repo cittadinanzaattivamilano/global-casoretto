@@ -211,3 +211,41 @@ button.c-item:hover .go{ background:var(--blue); color:#fff }
   .menu__in{ padding-top:22px }
 }
 @media (prefers-reduced-motion:reduce){ *,*::before,*::after{ transition:none!important; animation:none!important } }
+
+/* ---- v3: overview with hotspots, place = map + full card ---- */
+.sheet{ max-height:none; height:var(--sh,auto) }
+[data-mode="place"] .sheet{ --sh:56dvh }
+[data-mode="home"] .sheet{ --sh:auto; max-height:46dvh }
+.sheet__body{ overflow-y:auto!important; flex:1; padding:16px 18px 10px; -webkit-overflow-scrolling:touch; overscroll-behavior:contain }
+[data-mode="home"] .c-list--home{ display:none }
+.sheet__nav{ border-top:1px solid var(--blue); padding:10px 14px 12px }
+.c-hint{ margin:0; font-size:14px; font-weight:700; text-align:center; flex:1 }
+.c-od__row{ opacity:1!important; display:grid!important; cursor:default }
+.c-od__row .micro{ background:none!important; color:var(--blue)!important }
+.c-od__row + .c-od__row .micro{ background:var(--blue)!important; color:#fff!important }
+.c-items li.is-on .c-item{ background:var(--tint2); box-shadow:-10px 0 0 var(--tint2),10px 0 0 var(--tint2) }
+.c-item{ grid-template-columns:1fr }
+button.c-item strong{ text-decoration:underline; text-decoration-thickness:1px; text-underline-offset:3px }
+.btn .nx{ display:grid; text-align:left; line-height:1.15; font-size:15px } .btn .nx small{ font-weight:400; font-size:11.5px; opacity:.85 }
+.sw{ position:absolute; z-index:25; left:10px; top:calc(max(10px,env(safe-area-inset-top)) + 52px); display:inline-flex; align-items:center; gap:7px; height:30px; padding:0 11px 0 5px; background:#fff; border:1px solid var(--blue); border-radius:999px; font-size:12.5px; font-weight:700 }
+.sw__k{ position:relative; width:30px; height:18px; border-radius:999px; border:1px solid var(--blue); background:#fff; transition:background .25s }
+.sw__k::after{ content:''; position:absolute; left:2px; top:2px; width:12px; height:12px; border-radius:50%; background:var(--blue); transition:transform .25s var(--ease), background .25s }
+.sw[aria-checked="true"] .sw__k{ background:var(--blue) } .sw[aria-checked="true"] .sw__k::after{ transform:translateX(12px); background:#fff }
+.gc-hot{ background:none; border:0 }
+.gc-hot__in{ position:absolute; left:0; top:0; transform:translate(-50%,-50%); height:32px; padding:0 13px; background:var(--blue); color:#fff; border:2px solid #fff; border-radius:999px; font-size:13.5px; font-weight:700; white-space:nowrap; box-shadow:0 3px 10px rgba(28,68,255,.3); transition:transform .2s var(--ease) }
+.gc-hot__in:hover{ transform:translate(-50%,-50%) scale(1.07) }
+.gc-chip__in{ height:auto; padding:1px 5px; background:none; border:0; box-shadow:none; border-radius:6px; font-size:12px; line-height:1.2; text-shadow:0 0 3px #fff,0 0 3px #fff,0 0 3px #fff,0 0 2px #fff }
+.gc-chip__in:hover{ background:#fff; color:var(--blue) }
+.gc-chip.is-sel .gc-chip__in{ background:var(--blue); color:#fff; text-shadow:none; animation:none }
+[data-lock="1"] #map{ cursor:default }
+[data-mode="home"] .tools{ display:none }
+@media (max-width:899px){ [data-mode="place"] .mapwrap{ bottom:56dvh } [data-mode="place"] .sw{ } }
+@media (min-width:900px){
+  :root{ --panel:460px }
+  .sheet{ height:auto!important; max-height:none!important }
+  [data-mode="home"] .c-list--home{ display:block }
+  .sw{ left:16px; top:16px; height:34px; font-size:13.5px }
+}
+.c-row{ grid-template-columns:1fr auto }
+.sheet__nav .btn--grow{ flex:1!important; justify-content:space-between }
+.gc-chip__in{ transform:translate(-50%,-50%) }

@@ -21,12 +21,11 @@
 </header>
 <div class="mapwrap">
 <div id="map" role="application" aria-label="Mappa del Casoretto con gli interventi proposti"></div>
-<div class="toggle" role="group" aria-label="Mostra il quartiere com'è oggi o come potrebbe diventare"><button type="button" data-s="oggi" aria-pressed="false">Oggi</button><button type="button" data-s="domani" aria-pressed="true">Domani</button></div>
-<div class="tools"><button class="rbtn zb zb-in" type="button" aria-label="Ingrandisci"><svg class="i" viewBox="0 0 20 20" aria-hidden="true"><path d="M10 4v12M4 10h12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button><button class="rbtn zb zb-out" type="button" aria-label="Riduci"><svg class="i" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button><button class="rbtn home-btn" type="button" aria-label="Torna al centro del quartiere"><svg class="i" viewBox="0 0 20 20" aria-hidden="true"><path d="M3 8V3h5M17 12v5h-5M12 3h5v5M8 17H3v-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+<button class="sw" type="button" role="switch" aria-checked="false" aria-label="Mostra com'è oggi"><span class="sw__k"></span><span>Com'è oggi</span></button>
+<div class="tools"><button class="rbtn zb zb-in" type="button" aria-label="Ingrandisci"><svg class="i" viewBox="0 0 20 20" aria-hidden="true"><path d="M10 4v12M4 10h12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button><button class="rbtn zb zb-out" type="button" aria-label="Riduci"><svg class="i" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></div>
 <p class="toast" role="status"></p>
 </div>
 <section class="sheet" aria-label="Scheda">
-<button class="sheet__handle" type="button" aria-label="Apri o chiudi la scheda"></button>
 <div class="sheet__body" id="card"></div>
 <div class="sheet__nav" id="nav"></div>
 </section>
