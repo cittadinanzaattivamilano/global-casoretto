@@ -96,7 +96,7 @@ const homeB=()=>D.home;
 
 /* ---------- cards ---------- */
 function openZoom(src){ const d=$('#zoom'), im=$('img',d); im.src=src; im.classList.remove('is-big'); d.showModal(); history.pushState({gcZoom:1},'',location.href); }
-function home(o={}){ free(); $('.sec-btn').hidden=true; cur=null; selK=-1; root.dataset.mode='home'; lock(true); document.title='Global Casoretto · come potrebbe cambiare il quartiere';
+function home(o={}){ free(); $('.sec-btn').hidden=true; $('.x-btn').hidden=true; cur=null; selK=-1; root.dataset.mode='home'; lock(true); document.title='Global Casoretto · come potrebbe cambiare il quartiere';
   card.innerHTML=`<p class="micro c-kick">Una visione per il quartiere · Milano, Municipio 3</p><h1 class="c-h1">${esc(D.intro.t)}</h1><p class="c-lede">${esc(D.intro.p)}</p>
 <div class="c-key">
 <section><h2 class="micro">Più alberi</h2><dl class="c-facts" style="--n:2"><div><dt>380</dt><dd>nuovi alberi (stima)</dd></div><div><dt>580+</dt><dd>alberi esistenti conservati</dd></div></dl>
@@ -131,6 +131,7 @@ function select(id,o={}){ const p=byId[id]; if(!p) return; free(); cur=p; selK=-
   nav.innerHTML=`<button class="btn btn--ghost" data-a="home" aria-label="Torna alla visione d'insieme">${I.out}<span>Insieme</span></button><button class="btn btn--grow" data-a="next"><span class="nx"><small>Prossimo</small>${esc(nx.name)}</span>${I.next}</button>`;
   $('[data-a="home2"]',card).onclick=()=>home();
   $$('.c-zoom',card).forEach(z=>z.addEventListener('click',()=>openZoom(z.dataset.full)));
+  $('.x-btn').hidden=false;
   const sb=$('.sec-btn'); sb.hidden=!p.sec; if(p.sec) sb.onclick=()=>openZoom(p.sec.full);
   $$('button.c-item',card).forEach(b=>b.addEventListener('click',()=>focusItem(p,+b.dataset.k)));
   const fb=$('[data-a="full"]',card); if(fb) fb.onclick=()=>go(p.full,{maxZoom:1});
@@ -147,6 +148,7 @@ function focusItem(p,k,pt,fromMap){ const it=p.items[k]; selK=k; setState('doman
 $('.zoom__x').addEventListener('click',()=>$('#zoom').close());
 $('#zoom').addEventListener('close',()=>{ if(history.state&&history.state.gcZoom) history.back(); });
 addEventListener('popstate',()=>{ const d=$('#zoom'); if(d.open) d.close(); }); $('#zoom img').addEventListener('click',e=>e.currentTarget.classList.toggle('is-big'));
+$('.x-btn').addEventListener('click',()=>home());
 const menu=$('#menu');
 
 $('.menu-btn').addEventListener('click',()=>{ $('#menu-list').innerHTML=`<ul class="c-list">${P.map(p=>`<li><button class="c-row" data-go="${p.id}"><span><strong>${esc(p.title)}</strong><span class="t">${esc(p.tag)}</span></span>${I.next}</button></li>`).join('')}</ul>`;
