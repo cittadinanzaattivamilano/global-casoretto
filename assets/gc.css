@@ -302,3 +302,13 @@ button.c-item strong{ text-decoration:underline; text-decoration-thickness:1px; 
 @media (max-width:899px){ [data-mode="home"] .gc-hot:not(.gc-hot--near) .gc-hot__in{ height:25px; padding:0 9px; font-size:11.5px; border-width:1.5px } }
 /* phone: no legend */
 @media (max-width:899px){ #lg, .c-lg{ display:none!important } }
+
+/* phone overview: names as plain bold text */
+@media (max-width:899px){
+ [data-mode] .gc-hot.gc-hot--txt .gc-hot__in{ height:auto; padding:3px 2px; background:none; border:0; border-radius:0; box-shadow:none; color:var(--blue); font-size:12px; line-height:14px; font-weight:700;
+   text-shadow:0 0 2px #fff,0 0 2px #fff,0 0 3px #fff,0 0 5px #fff,0 0 6px #fff }
+ [data-mode] .gc-hot--txt.gc-hot--t .gc-hot__in{ transform:translate(-50%,-100%) }
+ [data-mode] .gc-hot--txt.gc-hot--b .gc-hot__in{ transform:translate(-50%,0) }
+ [data-mode] .gc-hot--txt.gc-hot--r .gc-hot__in{ transform:translate(0,-50%) }
+ [data-mode] .gc-hot--txt.gc-hot--l .gc-hot__in{ transform:translate(-100%,-50%) }
+}

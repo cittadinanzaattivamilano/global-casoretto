@@ -40,11 +40,18 @@ for(const id of order){ const p=byId[id];
   p.poly.on('click',()=>{ if(cur!==p) select(p.id); }); }
 /* hotspot labels of the overview (with a leader to the place) */
 const hot=L.layerGroup().addTo(map);
-for(const p of P){ if(!desk.matches&&p.labm) p.lab=p.labm;
+const txtL=[];
+for(const p of P){ const txt=!desk.matches&&p.labm&&p.labm[2];
+  if(txt){ const A=ll(p.anchor[0],p.anchor[1]);
+    const ln=L.polyline([A,A],{pane:'leads',color:'#1c44ff',weight:1.2,interactive:false}), dt=L.circleMarker(A,{pane:'leads',radius:2.8,color:'#1c44ff',fillColor:'#1c44ff',fillOpacity:1,weight:0,interactive:false});
+    const m=L.marker(A,{pane:'pins',keyboard:false,icon:L.divIcon({className:'gc-hot gc-hot--txt gc-hot--'+txt,iconSize:null,html:`<button class="gc-hot__in" type="button">${esc(p.name)}</button>`})});
+    m.on('click',()=>select(p.id)); hot.addLayer(ln); hot.addLayer(dt); hot.addLayer(m); txtL.push({p,A,ln,m,d:p.labm}); continue; }
   if(Math.hypot(p.lab[0]-p.anchor[0],p.lab[1]-p.anchor[1])>30){ hot.addLayer(L.polyline([ll(p.lab[0],p.lab[1]),ll(p.anchor[0],p.anchor[1])],{pane:'leads',color:'#1c44ff',weight:1.5,interactive:false}));
     hot.addLayer(L.circleMarker(ll(p.anchor[0],p.anchor[1]),{pane:'leads',radius:3.5,color:'#1c44ff',fillColor:'#1c44ff',fillOpacity:1,weight:0,interactive:false})); }
   const m=L.marker(ll(p.lab[0],p.lab[1]),{pane:'pins',keyboard:false,icon:L.divIcon({className:'gc-hot',iconSize:null,html:`<button class="gc-hot__in" type="button">${esc(p.name)}</button>`})});
   m.on('click',()=>select(p.id)); hot.addLayer(m); }
+function placeTxt(){ if(!txtL.length) return; try{ for(const o of txtL){ const c=map.latLngToContainerPoint(o.A), q=map.containerPointToLatLng(c.add([o.d[0],o.d[1]])); o.m.setLatLng(q); o.ln.setLatLngs([q,o.A]); } }catch(e){} }
+map.on('zoomend viewreset resize',placeTxt);
 /* in a place: the other places stay visible as hotspots (blue area + name), a click moves there */
 const near=L.layerGroup().addTo(map);
 for(const p of P){ p.near=L.marker(ll(p.anchor[0],p.anchor[1]),{pane:'pins',keyboard:false,icon:L.divIcon({className:'gc-hot gc-hot--near',iconSize:null,html:`<button class="gc-hot__in" type="button">${esc(p.name)}</button>`})});
@@ -81,7 +88,7 @@ for(const s of D.streets){ const m=L.marker(ll(s.x,s.y),{pane:'streets',interact
 let state='domani', cur=null, selK=-1;
 function setState(s){ state=s; root.dataset.state=s; const sw=$('.sw'); sw.setAttribute('aria-checked',s==='oggi'); requestAnimationFrame(()=>cull()); }
 $('.sw').addEventListener('click',()=>setState(state==='oggi'?'domani':'oggi'));
-function refresh(){
+function refresh(){ placeTxt();
   const z=map.getZoom(), home=!cur; root.dataset.tier=z<0.7?'mid':'near';
   for(const p of P){ p.poly.setStyle(home||(p.label&&p===cur)?{opacity:.9,fillOpacity:.22,weight:1.5}:p!==cur?{opacity:.75,fillOpacity:.18,weight:1.5}:{opacity:0,fillOpacity:0,weight:1.5}); }
   nearUpdate();
