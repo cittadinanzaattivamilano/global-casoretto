@@ -33,7 +33,7 @@ const INTER=['dragging','touchZoom','scrollWheelZoom','doubleClickZoom','boxZoom
 function lock(v){ INTER.forEach(k=>map[k]&&map[k][v?'disable':'enable']()); root.dataset.lock=v?'1':'0'; }
 
 const byId={}; P.forEach((p,i)=>{ p.i=i; byId[p.id]=p; });
-const order=['via-porpora','viale-lombardia','via-teodosio','via-casoretto','piazza-durante','largo-gemito','san-materno','cinema'].filter(i=>byId[i]);
+const order=['via-porpora','viale-lombardia','via-teodosio','via-casoretto','piazza-durante','largo-gemito','san-materno','via-accademia','cinema'].filter(i=>byId[i]);
 for(const id of order){ const p=byId[id];
   p.poly=L.polygon(p.dom.map(q=>ll(q[0],q[1])),{color:'#1c44ff',weight:1.5,fillColor:'#1c44ff',fillOpacity:.2,className:'gc-dom',bubblingMouseEvents:false}).addTo(map);
   p.poly.on('click',()=>{ if(cur!==p) select(p.id); }); }
@@ -51,17 +51,18 @@ for(const p of P) p.items.forEach((it,k)=>{ if(!it.chip) return; (it.pts||[]).fo
   const tg=(pt[2]||[]).filter(t=>Math.hypot(t[0]-pt[0],t[1]-pt[1])>2); m._ld=[]; if(tg.length){ const dx=tg.reduce((a,t)=>a+t[0],0)/tg.length-pt[0]; m.options.icon.options.className='gc-chip '+(dx<0?'gc-chip--l':'gc-chip--r');
     for(const t of tg){ m._ld.push(L.polyline([ll(pt[0],pt[1]),ll(t[0],t[1])],{pane:'leads',color:'#1c44ff',weight:1.2,interactive:false,opacity:0})); m._ld.push(L.circleMarker(ll(t[0],t[1]),{pane:'leads',radius:2.6,color:'#fff',weight:1,fillColor:'#1c44ff',fillOpacity:0,opacity:0,interactive:false})); } }
   m.on('click',()=>{ if(cur!==p) select(p.id,{fly:false}); focusItem(p,k,pt,true); }); m._gc={p,k,pr:it.pr,t:it.title}; chips.addLayer(m); chipList.push(m); }); });
+for(const p of P){ if(!p.label) continue; const m=L.marker(ll(p.anchor[0],p.anchor[1]-16),{pane:'chips',interactive:false,keyboard:false,icon:L.divIcon({className:'gc-chip',iconSize:null,html:`<span class="gc-chip__in">${esc(p.label)}</span>`})}); m._gc={p,k:-9,pr:-1,t:''}; m._ld=[]; chips.addLayer(m); chipList.push(m); }
 const streets=L.layerGroup(); const stList=[];
 for(const s of D.streets){ const m=L.marker(ll(s.x,s.y),{pane:'streets',interactive:false,keyboard:false,icon:L.divIcon({className:'gc-st',iconSize:null,
     html:`<span class="gc-st__in" style="transform:rotate(${s.a}deg) translate(-50%,-50%)">${esc(s.t)}</span>`})}); m._len=s.len; streets.addLayer(m); stList.push(m); }
 
 /* ---------- state ---------- */
 let state='domani', cur=null, selK=-1;
-function setState(s){ state=s; root.dataset.state=s; const sw=$('.sw'); sw.setAttribute('aria-checked',s==='oggi'); }
+function setState(s){ state=s; root.dataset.state=s; const sw=$('.sw'); sw.setAttribute('aria-checked',s==='oggi'); requestAnimationFrame(()=>cull()); }
 $('.sw').addEventListener('click',()=>setState(state==='oggi'?'domani':'oggi'));
 function refresh(){
   const z=map.getZoom(), home=!cur; root.dataset.tier=z<0.7?'mid':'near';
-  for(const p of P){ p.poly.setStyle(home?{opacity:.9,fillOpacity:.22,weight:1.5}:{opacity:0,fillOpacity:0,weight:1.5}); }
+  for(const p of P){ p.poly.setStyle(home||(p.label&&p===cur)?{opacity:.9,fillOpacity:.22,weight:1.5}:{opacity:0,fillOpacity:0,weight:1.5}); }
   if(home){ if(!map.hasLayer(hot)) hot.addTo(map); } else if(map.hasLayer(hot)) map.removeLayer(hot);
   if(z>=-1.4){ if(!map.hasLayer(streets)) streets.addTo(map); } else if(map.hasLayer(streets)) map.removeLayer(streets);
   requestAnimationFrame(cull);
@@ -72,8 +73,8 @@ function cull(){
   if(!cur) $$('.gc-hot__in').forEach(e=>taken.push(e.getBoundingClientRect()));
   const mine=m=>m._gc.p===cur||!!(cur&&cur.borrow&&m._gc.p.id===cur.borrow.frm&&cur.borrow.titles.includes(m._gc.t));
   const pr=m=>(m._gc.p===cur&&m._gc.k===selK?0:mine(m)?1:2);
-  for(const m of [...chipList].sort((a,c)=>pr(a)-pr(c)||a._gc.pr-c._gc.pr)){ const el=m.getElement(); if(!el) continue; const sel=pr(m)===0; el.classList.toggle('is-sel',sel); let on=true;
-    if(!cur||!(z>=0.7||mine(m))||!b.contains(m.getLatLng())) on=false;
+  for(const m of [...chipList].sort((a,c)=>pr(a)-pr(c)||a._gc.pr-c._gc.pr)){ const el=m.getElement(); if(!el) continue; const sel=pr(m)===0; el.classList.toggle('is-sel',sel); let on=state!=='oggi';
+    if(!on||!cur||!(z>=0.7||mine(m))||!b.contains(m.getLatLng())) on=false;
     else { const r=el.firstElementChild.getBoundingClientRect(); if(hit(r)&&!sel) on=false; else taken.push(r); }
     el.classList.toggle('is-off',!on); m._ld.forEach(x=>x.setStyle({opacity:on?1:0,fillOpacity:on&&x instanceof L.CircleMarker?1:0})); }
   if(map.hasLayer(streets)) for(const m of stList){ const el=m.getElement(); if(!el) continue; const need=m._len>=900?-1.4:m._len>=350?-0.8:m._len>=160?0:0.6;
@@ -87,7 +88,7 @@ function limit(p,wait){ clearTimeout(limit.t); limit.t=setTimeout(()=>{ if(cur!=
   map.setMinZoom(Math.min(map.getZoom(),map.getBoundsZoom(BB(b),false))); map.options.maxBoundsViscosity=1; map.setMaxBounds(BB(b)); },wait); }
 let flying=false; map.on('movestart',e=>{}); 
 function pad(){ if(desk.matches) return {paddingTopLeft:[40,40],paddingBottomRight:[40,40]};
-  const h=cur?0:sheet.getBoundingClientRect().height; return {paddingTopLeft:[12,cur?96:60],paddingBottomRight:[12,h+12]}; }
+  return {paddingTopLeft:[12,96],paddingBottomRight:[12,12]}; }
 function go(b,o={}){ const opt=Object.assign(pad(),{maxZoom:2.25},o);
   flying=true; clearTimeout(go.t); go.t=setTimeout(()=>{ flying=false; },1900);
   if(reduce||o.animate===false) map.fitBounds(BB(b),Object.assign(opt,{animate:false})); else map.flyToBounds(BB(b),Object.assign(opt,{duration:1.4,easeLinearity:.2})); }
@@ -98,7 +99,7 @@ function openZoom(src){ const d=$('#zoom'), im=$('img',d); im.src=src; im.classL
 function home(o={}){ free(); $('.sec-btn').hidden=true; cur=null; selK=-1; root.dataset.mode='home'; lock(true); document.title='Global Casoretto · come potrebbe cambiare il quartiere';
   card.innerHTML=`<p class="micro c-kick">Una visione per il quartiere · Milano, Municipio 3</p><h1 class="c-h1">${esc(D.intro.t)}</h1><p class="c-lede">${esc(D.intro.p)}</p>
 <div class="c-key">
-<section><h2 class="micro">Più alberi</h2><dl class="c-facts" style="--n:2"><div><dt>370</dt><dd>nuovi alberi (stima)</dd></div><div><dt>580+</dt><dd>alberi esistenti conservati</dd></div></dl>
+<section><h2 class="micro">Più alberi</h2><dl class="c-facts" style="--n:2"><div><dt>380</dt><dd>nuovi alberi (stima)</dd></div><div><dt>580+</dt><dd>alberi esistenti conservati</dd></div></dl>
 <p>Nessun albero dei viali viene tolto. Via Porpora, oggi senza alberi lungo la strada, ne riceve circa 190; via Casoretto diventa un filare continuo.</p></section>
 <section><h2 class="micro">Più sicurezza</h2><dl class="c-facts" style="--n:2"><div><dt>4 km</dt><dd>di strade a 30 km/h o meno</dd></div><div><dt>5</dt><dd>nuovi semafori pedonali</dd></div></dl>
 <p>Ciclabili protette su ogni via ridisegnata, marciapiedi liberi dalle auto, incroci rialzati, due piazze senza traffico.</p></section>
@@ -114,7 +115,8 @@ function placeHTML(p){
     return `<li id="it-${k}">${has?`<button class="c-item" data-k="${k}" aria-label="${esc(it.chip||it.title)}: mostra sulla mappa">${inner}</button>`:`<div class="c-item">${inner}</div>`}</li>`; }).join('');
   const fig=p.sec?`<figure class="c-sketch"><img src="${p.sec.src}" width="${p.sec.w}" height="${p.sec.h}" alt="Sezione della strada, oggi e con il progetto" loading="lazy"><button class="c-zoom" type="button" data-full="${p.sec.full}">Apri a schermo intero</button><figcaption>La sezione della strada: oggi e con il progetto</figcaption></figure>`
     :p.sketch?`<figure class="c-sketch"><img src="${p.sketch.src}" width="${p.sketch.w}" height="${p.sketch.h}" alt="Disegno: ${esc(p.sketch.cap)}" loading="lazy"><button class="c-zoom" type="button" data-full="${p.sketch.full}">Apri a schermo intero</button><figcaption>${esc(p.sketch.cap)}</figcaption></figure>`:'';
-  return `<p class="micro c-kick">${esc(p.cat)} · ${p.i+1} di ${N}</p>
+  return `<button class="c-back" type="button" data-a="home2">${I.prev}Tutti gli interventi</button>
+<p class="micro c-kick">${esc(p.cat)} · ${p.i+1} di ${N}</p>
 <h2 class="c-title">${esc(p.title)}</h2><p class="c-tag">${esc(p.tag)}</p>
 <div class="c-od"><div class="c-od__row"><span class="micro">Oggi</span><span>${esc(p.oggi)}</span></div><div class="c-od__row"><span class="micro">Domani</span><span>${esc(p.domani)}</span></div></div>
 <dl class="c-facts" style="--n:${p.facts.length}">${facts}</dl>
@@ -123,11 +125,11 @@ ${p.full?`<div class="c-links"><button class="c-link" data-a="full">Vedi tutta l
 <h3 class="micro c-sub">Cosa trovi</h3><ul class="c-items">${items}</ul>
 ${fig}
 ${p.trees?`<h3 class="micro c-sub">Gli alberi</h3><p class="c-text c-text--s">${esc(p.trees.intro)}</p><ul class="c-items">${p.trees.cards.map(t=>`<li><div class="c-item"><strong>${esc(t.title)}</strong><span class="t">${esc(t.text)}</span></div></li>`).join('')}</ul>`:''}
-<h3 class="micro c-sub">Scarica</h3><div class="c-links">
-<a class="c-link" href="${p.pdf}" download><span>Scarica la tavola<small>PDF · ${p.pdfSize}</small></span>${I.dl}</a></div>`; }
+${p.pdf?`<h3 class="micro c-sub">Scarica</h3><div class="c-links"><a class="c-link" href="${p.pdf}" download><span>Scarica la tavola<small>PDF · ${p.pdfSize}</small></span>${I.dl}</a></div>`:''}`; }
 function select(id,o={}){ const p=byId[id]; if(!p) return; free(); cur=p; selK=-1; root.dataset.mode='place'; lock(false);
   card.innerHTML=placeHTML(p); const nx=P[(p.i+1)%N];
   nav.innerHTML=`<button class="btn btn--ghost" data-a="home" aria-label="Torna alla visione d'insieme">${I.out}<span>Insieme</span></button><button class="btn btn--grow" data-a="next"><span class="nx"><small>Prossimo</small>${esc(nx.name)}</span>${I.next}</button>`;
+  $('[data-a="home2"]',card).onclick=()=>home();
   $$('.c-zoom',card).forEach(z=>z.addEventListener('click',()=>openZoom(z.dataset.full)));
   const sb=$('.sec-btn'); sb.hidden=!p.sec; if(p.sec) sb.onclick=()=>openZoom(p.sec.full);
   $$('button.c-item',card).forEach(b=>b.addEventListener('click',()=>focusItem(p,+b.dataset.k)));
