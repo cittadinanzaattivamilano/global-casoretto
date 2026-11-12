@@ -395,3 +395,4 @@ body{ background:#fff; word-spacing:normal }
 .sheet{ border-top:1px solid var(--line) }
 .zoom::after{ font-size:13px; padding:8px 12px }
 .c-hint{ text-align:left }
+.c-lede{ line-height:24px } .c-tag{ line-height:24px }
