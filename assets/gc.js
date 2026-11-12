@@ -96,6 +96,12 @@ const homeB=()=>D.home;
 /* ---------- cards ---------- */
 function home(o={}){ free(); cur=null; selK=-1; root.dataset.mode='home'; lock(true); document.title='Global Casoretto · come potrebbe cambiare il quartiere';
   card.innerHTML=`<p class="micro c-kick">Una visione per il quartiere · Milano, Municipio 3</p><h1 class="c-h1">${esc(D.intro.t)}</h1><p class="c-lede">${esc(D.intro.p)}</p>
+<div class="c-key">
+<section><h2 class="micro">Più alberi</h2><dl class="c-facts" style="--n:2"><div><dt>370</dt><dd>nuovi alberi (stima)</dd></div><div><dt>580+</dt><dd>alberi esistenti conservati</dd></div></dl>
+<p>Nessun albero dei viali viene tolto. Via Porpora, oggi senza alberi lungo la strada, ne riceve circa 190; via Casoretto diventa un filare continuo.</p></section>
+<section><h2 class="micro">Più sicurezza</h2><dl class="c-facts" style="--n:2"><div><dt>4 km</dt><dd>di strade a 30 km/h o meno</dd></div><div><dt>5</dt><dd>nuovi semafori pedonali</dd></div></dl>
+<p>Ciclabili protette su ogni via ridisegnata, marciapiedi liberi dalle auto, incroci rialzati, due piazze senza traffico.</p></section>
+</div>
 <ul class="c-list c-list--home">${P.map(p=>`<li><button class="c-row" data-go="${p.id}"><span><strong>${esc(p.title)}</strong><span class="t">${esc(p.tag)}</span></span>${I.next}</button></li>`).join('')}</ul>`;
   nav.innerHTML=`<p class="c-hint">Tocca una zona sulla mappa per entrare.</p>`;
   $$('[data-go]',card).forEach(b=>b.addEventListener('click',()=>select(b.dataset.go)));

@@ -275,3 +275,11 @@ button.c-item strong{ text-decoration:underline; text-decoration-thickness:1px; 
   .zoom__vp img,.zoom__vp img.is-big{ flex:none; width:260vw; height:auto; max-width:none; object-fit:fill; margin:0 16px; cursor:default }
   .zoom::after{ content:'Scorri di lato per vedere tutto'; position:fixed; left:50%; bottom:max(16px,env(safe-area-inset-bottom)); transform:translateX(-50%); background:var(--blue); color:#fff; font-size:13px; font-weight:700; padding:7px 13px; border-radius:999px; white-space:nowrap; pointer-events:none }
 }
+
+.c-key{ display:grid; gap:18px; margin:14px 0 6px }
+.c-key section{ border-top:1px solid var(--blue); padding-top:10px }
+.c-key h2{ margin:0 0 2px }
+.c-key .c-facts{ border-bottom:0 }
+.c-key .c-facts dt{ font-size:26px }
+.c-key p{ margin:0; font-size:14.5px; line-height:1.45 }
+[data-mode="home"] .sheet{ max-height:52dvh }
