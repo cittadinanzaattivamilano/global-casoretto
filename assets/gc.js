@@ -121,7 +121,7 @@ ${p.trees?`<h3 class="micro c-sub">Gli alberi</h3><p class="c-text c-text--s">${
 function select(id,o={}){ const p=byId[id]; if(!p) return; free(); cur=p; selK=-1; root.dataset.mode='place'; lock(false);
   card.innerHTML=placeHTML(p); const nx=P[(p.i+1)%N];
   nav.innerHTML=`<button class="btn btn--ghost" data-a="home" aria-label="Torna alla visione d'insieme">${I.out}<span>Insieme</span></button><button class="btn btn--grow" data-a="next"><span class="nx"><small>Prossimo</small>${esc(nx.name)}</span>${I.next}</button>`;
-  $$('.c-zoom',card).forEach(z=>z.addEventListener('click',()=>{ const d=$('#zoom'), im=$('img',d); im.src=z.dataset.full; im.classList.remove('is-big'); d.showModal(); }));
+  $$('.c-zoom',card).forEach(z=>z.addEventListener('click',()=>{ const d=$('#zoom'), im=$('img',d); im.src=z.dataset.full; im.classList.remove('is-big'); d.showModal(); history.pushState({gcZoom:1},'',location.href); }));
   $$('button.c-item',card).forEach(b=>b.addEventListener('click',()=>focusItem(p,+b.dataset.k)));
   const fb=$('[data-a="full"]',card); if(fb) fb.onclick=()=>go(p.full,{maxZoom:1});
   $('[data-a="home"]',nav).onclick=()=>home(); $('[data-a="next"]',nav).onclick=()=>select(nx.id);
@@ -134,7 +134,9 @@ function focusItem(p,k,pt,fromMap){ const it=p.items[k]; selK=k; setState('doman
   requestAnimationFrame(cull); }
 
 /* ---------- menu ---------- */
-$('.zoom__x').addEventListener('click',()=>$('#zoom').close()); $('#zoom img').addEventListener('click',e=>e.currentTarget.classList.toggle('is-big'));
+$('.zoom__x').addEventListener('click',()=>$('#zoom').close());
+$('#zoom').addEventListener('close',()=>{ if(history.state&&history.state.gcZoom) history.back(); });
+addEventListener('popstate',()=>{ const d=$('#zoom'); if(d.open) d.close(); }); $('#zoom img').addEventListener('click',e=>e.currentTarget.classList.toggle('is-big'));
 const menu=$('#menu');
 
 $('.menu-btn').addEventListener('click',()=>{ $('#menu-list').innerHTML=`<ul class="c-list">${P.map(p=>`<li><button class="c-row" data-go="${p.id}"><span><strong>${esc(p.title)}</strong><span class="t">${esc(p.tag)}</span></span>${I.next}</button></li>`).join('')}</ul>`;

@@ -263,10 +263,15 @@ button.c-item strong{ text-decoration:underline; text-decoration-thickness:1px; 
 .c-sketch{ position:relative } .c-zoom{ position:absolute; right:8px; top:8px; height:32px; padding:0 12px; background:var(--blue); color:#fff; border:0; border-radius:999px; font-size:12.5px; font-weight:700 }
 .zoom{ position:fixed; inset:0; width:100%; height:100%; max-width:none; max-height:none; margin:0; padding:0; border:0; background:#fff }
 .zoom__x{ position:fixed; right:12px; top:max(12px,env(safe-area-inset-top)); z-index:2 }
-.zoom__vp{ width:100%; height:100%; overflow:auto; display:flex; -webkit-overflow-scrolling:touch }
-.zoom__vp img{ margin:auto; display:block; max-width:100%; max-height:100%; width:auto; height:auto; cursor:zoom-in }
-.zoom__vp img.is-big{ max-width:none; max-height:none; width:max(220vw,1600px); cursor:zoom-out }
+.zoom__vp{ position:absolute; inset:0; overflow:auto; -webkit-overflow-scrolling:touch; padding:64px 16px 24px }
+.zoom__vp img{ display:block; width:100%; height:100%; object-fit:contain; cursor:zoom-in }
+.zoom__vp img.is-big{ width:auto; height:auto; max-width:none; min-width:min(1800px,240vw); object-fit:fill; cursor:zoom-out }
 
 #lg{ display:none } #lg .micro{ margin:0 0 8px }
 .lg--card{ position:static; border:0; padding:0; font-size:13.5px } .lg--card .micro{ display:none } .lg--card ul{ grid-template-columns:1fr 1fr; gap:8px 12px }
 @media (min-width:900px){ [data-mode="place"] #lg{ display:block; top:auto; bottom:18px; left:16px } .c-lg{ display:none } }
+@media (max-width:899px){
+  .zoom__vp{ display:flex; align-items:center; padding:64px 0 24px }
+  .zoom__vp img,.zoom__vp img.is-big{ flex:none; width:260vw; height:auto; max-width:none; object-fit:fill; margin:0 16px; cursor:default }
+  .zoom::after{ content:'Scorri di lato per vedere tutto'; position:fixed; left:50%; bottom:max(16px,env(safe-area-inset-bottom)); transform:translateX(-50%); background:var(--blue); color:#fff; font-size:13px; font-weight:700; padding:7px 13px; border-radius:999px; white-space:nowrap; pointer-events:none }
+}
