@@ -266,3 +266,7 @@ button.c-item strong{ text-decoration:underline; text-decoration-thickness:1px; 
 .zoom__vp{ width:100%; height:100%; overflow:auto; display:flex; -webkit-overflow-scrolling:touch }
 .zoom__vp img{ margin:auto; display:block; max-width:100%; max-height:100%; width:auto; height:auto; cursor:zoom-in }
 .zoom__vp img.is-big{ max-width:none; max-height:none; width:max(220vw,1600px); cursor:zoom-out }
+
+#lg{ display:none } #lg .micro{ margin:0 0 8px }
+.lg--card{ position:static; border:0; padding:0; font-size:13.5px } .lg--card .micro{ display:none } .lg--card ul{ grid-template-columns:1fr 1fr; gap:8px 12px }
+@media (min-width:900px){ [data-mode="place"] #lg{ display:block; top:auto; bottom:18px; left:16px } .c-lg{ display:none } }

@@ -81,23 +81,26 @@ function cull(){
     const r=el.firstElementChild.getBoundingClientRect(); if(hit(r)) el.classList.add('is-off'); else { el.classList.remove('is-off'); taken.push(r); } }
 }
 map.on('zoomend moveend',refresh);
-let homeZ=-3; map.on('zoomend',()=>{ if(cur&&!flying&&map.getZoom()<=homeZ+0.5) home(); });
+let homeZ=-3;
+function free(){ clearTimeout(limit.t); map.setMaxBounds(BB([X0,Y0,X1,Y1])); map.options.maxBoundsViscosity=0.9; map.setMinZoom(-3); }
+function limit(p,wait){ clearTimeout(limit.t); limit.t=setTimeout(()=>{ if(cur!==p) return; const a=p.full||p.view, v=p.view; let b=[Math.min(a[0],v[0]),Math.min(a[1],v[1]),Math.max(a[2],v[2]),Math.max(a[3],v[3])]; const mx=(b[2]-b[0])*0.2+40, my=(b[3]-b[1])*0.2+40; b=[b[0]-mx,b[1]-my,b[2]+mx,b[3]+my];
+  map.setMinZoom(Math.min(map.getZoom(),map.getBoundsZoom(BB(b),false))); map.options.maxBoundsViscosity=1; map.setMaxBounds(BB(b)); },wait); }
 let flying=false; map.on('movestart',e=>{}); 
 function pad(){ if(desk.matches) return {paddingTopLeft:[40,40],paddingBottomRight:[40,40]};
-  const h=sheet.getBoundingClientRect().height; return {paddingTopLeft:[12,60],paddingBottomRight:[12,h+12]}; }
+  const h=cur?0:sheet.getBoundingClientRect().height; return {paddingTopLeft:[12,cur?96:60],paddingBottomRight:[12,h+12]}; }
 function go(b,o={}){ const opt=Object.assign(pad(),{maxZoom:2.25},o);
   flying=true; clearTimeout(go.t); go.t=setTimeout(()=>{ flying=false; },1900);
   if(reduce||o.animate===false) map.fitBounds(BB(b),Object.assign(opt,{animate:false})); else map.flyToBounds(BB(b),Object.assign(opt,{duration:1.4,easeLinearity:.2})); }
 const homeB=()=>D.home;
 
 /* ---------- cards ---------- */
-function home(o={}){ cur=null; selK=-1; root.dataset.mode='home'; lock(true); document.title='Global Casoretto · come potrebbe cambiare il quartiere';
+function home(o={}){ free(); cur=null; selK=-1; root.dataset.mode='home'; lock(true); document.title='Global Casoretto · come potrebbe cambiare il quartiere';
   card.innerHTML=`<p class="micro c-kick">Una visione per il quartiere · Milano, Municipio 3</p><h1 class="c-h1">${esc(D.intro.t)}</h1><p class="c-lede">${esc(D.intro.p)}</p>
 <ul class="c-list c-list--home">${P.map(p=>`<li><button class="c-row" data-go="${p.id}"><span><strong>${esc(p.title)}</strong><span class="t">${esc(p.tag)}</span></span>${I.next}</button></li>`).join('')}</ul>`;
   nav.innerHTML=`<p class="c-hint">Tocca una zona sulla mappa per entrare.</p>`;
   $$('[data-go]',card).forEach(b=>b.addEventListener('click',()=>select(b.dataset.go)));
   body.scrollTop=0; if(o.hash!==false) history.replaceState(null,'',location.pathname+location.search);
-  requestAnimationFrame(()=>requestAnimationFrame(()=>{ go(homeB(),{animate:o.animate,maxZoom:0}); homeZ=map.getBoundsZoom(BB(homeB()),false,L.point(24,24)); refresh(); })); }
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{ map.invalidateSize(false); go(homeB(),{animate:o.animate,maxZoom:0}); homeZ=map.getBoundsZoom(BB(homeB()),false,L.point(24,24)); refresh(); })); }
 function placeHTML(p){
   const facts=p.facts.map(f=>`<div><dt>${esc(f[0])}</dt><dd>${esc(f[1])}</dd></div>`).join('');
   const items=p.items.map((it,k)=>{ const has=it.pts&&it.pts.length; const inner=`<strong>${esc(it.chip||it.title)}</strong><span class="t">${esc(it.text)}</span>`;
@@ -109,13 +112,13 @@ function placeHTML(p){
 <div class="c-od"><div class="c-od__row"><span class="micro">Oggi</span><span>${esc(p.oggi)}</span></div><div class="c-od__row"><span class="micro">Domani</span><span>${esc(p.domani)}</span></div></div>
 <dl class="c-facts" style="--n:${p.facts.length}">${facts}</dl>
 ${p.full?`<div class="c-links"><button class="c-link" data-a="full">Vedi tutta la via ${I.out}</button></div>`:''}
+<div class="c-lg"><h3 class="micro c-sub">Legenda</h3><div class="lg lg--card">${$('#lg').innerHTML}</div></div>
 <h3 class="micro c-sub">Cosa trovi</h3><ul class="c-items">${items}</ul>
 ${fig}
 ${p.trees?`<h3 class="micro c-sub">Gli alberi</h3><p class="c-text c-text--s">${esc(p.trees.intro)}</p><ul class="c-items">${p.trees.cards.map(t=>`<li><div class="c-item"><strong>${esc(t.title)}</strong><span class="t">${esc(t.text)}</span></div></li>`).join('')}</ul>`:''}
-<h3 class="micro c-sub">Per approfondire</h3><div class="c-links">${p.extra?`<a class="c-link" href="${p.extra.href}"><span>${esc(p.extra.t)}<small>${esc(p.extra.s)}</small></span>${I.next}</a>`:''}
-<a class="c-link" href="${p.id}/"><span>Tavola tecnica<small>Pianta completa, sezione e legenda</small></span>${I.next}</a>
+<h3 class="micro c-sub">Scarica</h3><div class="c-links">
 <a class="c-link" href="${p.pdf}" download><span>Scarica la tavola<small>PDF · ${p.pdfSize}</small></span>${I.dl}</a></div>`; }
-function select(id,o={}){ const p=byId[id]; if(!p) return; cur=p; selK=-1; root.dataset.mode='place'; lock(false);
+function select(id,o={}){ const p=byId[id]; if(!p) return; free(); cur=p; selK=-1; root.dataset.mode='place'; lock(false);
   card.innerHTML=placeHTML(p); const nx=P[(p.i+1)%N];
   nav.innerHTML=`<button class="btn btn--ghost" data-a="home" aria-label="Torna alla visione d'insieme">${I.out}<span>Insieme</span></button><button class="btn btn--grow" data-a="next"><span class="nx"><small>Prossimo</small>${esc(nx.name)}</span>${I.next}</button>`;
   $$('.c-zoom',card).forEach(z=>z.addEventListener('click',()=>{ const d=$('#zoom'), im=$('img',d); im.src=z.dataset.full; im.classList.remove('is-big'); d.showModal(); }));
@@ -123,7 +126,7 @@ function select(id,o={}){ const p=byId[id]; if(!p) return; cur=p; selK=-1; root.
   const fb=$('[data-a="full"]',card); if(fb) fb.onclick=()=>go(p.full,{maxZoom:1});
   $('[data-a="home"]',nav).onclick=()=>home(); $('[data-a="next"]',nav).onclick=()=>select(nx.id);
   body.scrollTop=0; history.replaceState(null,'','#'+id); document.title=p.title+' · Global Casoretto';
-  requestAnimationFrame(()=>requestAnimationFrame(()=>{ if(o.fly!==false) go(p.view,{animate:o.animate}); refresh(); })); }
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{ map.invalidateSize(false); if(o.fly!==false) go(p.view,{animate:o.animate}); refresh(); limit(p,(reduce||o.animate===false||o.fly===false)?60:1800); })); }
 function focusItem(p,k,pt,fromMap){ const it=p.items[k]; selK=k; setState('domani');
   $$('.c-items li',card).forEach(li=>li.classList.toggle('is-on',li.id==='it-'+k));
   const li=$('#it-'+k,card); if(li&&fromMap) li.scrollIntoView({block:'center',behavior:reduce?'auto':'smooth'});
@@ -133,13 +136,13 @@ function focusItem(p,k,pt,fromMap){ const it=p.items[k]; selK=k; setState('doman
 /* ---------- menu ---------- */
 $('.zoom__x').addEventListener('click',()=>$('#zoom').close()); $('#zoom img').addEventListener('click',e=>e.currentTarget.classList.toggle('is-big'));
 const menu=$('#menu');
-$('.lg-btn').addEventListener('click',e=>{ const l=$('#lg'); l.hidden=!l.hidden; e.currentTarget.setAttribute('aria-expanded',!l.hidden); });
+
 $('.menu-btn').addEventListener('click',()=>{ $('#menu-list').innerHTML=`<ul class="c-list">${P.map(p=>`<li><button class="c-row" data-go="${p.id}"><span><strong>${esc(p.title)}</strong><span class="t">${esc(p.tag)}</span></span>${I.next}</button></li>`).join('')}</ul>`;
   $$('[data-go]',menu).forEach(b=>b.addEventListener('click',()=>{ menu.close(); select(b.dataset.go); })); menu.showModal(); });
 $('.menu__close').addEventListener('click',()=>menu.close());
 $('.zb-in')?.addEventListener('click',()=>map.zoomIn()); $('.zb-out')?.addEventListener('click',()=>map.zoomOut());
 $('.brand').addEventListener('click',e=>{ e.preventDefault(); home(); });
-function fitMin(){ map.setMinZoom(Math.max(-3,map.getBoundsZoom(BB([X0,Y0,X1,Y1]),false))); }
+function fitMin(){}
 map.fitBounds(BB(homeB()),{animate:false}); fitMin(); chipList.forEach(m=>m._ld.forEach(x=>x.addTo(map))); homeZ=map.getBoundsZoom(BB(homeB()),false,L.point(24,24)); setState('domani');
 const h0=location.hash.slice(1); if(byId[h0]) select(h0,{animate:false}); else home({animate:false});
 addEventListener('resize',()=>{ map.invalidateSize(); fitMin(); if(!cur) go(homeB(),{animate:false,maxZoom:0}); });
