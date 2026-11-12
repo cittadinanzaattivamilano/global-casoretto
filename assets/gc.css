@@ -315,3 +315,97 @@ button.c-item strong{ text-decoration:underline; text-decoration-thickness:1px; 
 
 /* phone overview: no today/tomorrow switch */
 @media (max-width:899px){ [data-mode="home"] .sw{ display:none!important } }
+
+/* ===== CAMI design system =====
+   Square corners everywhere (round only for map points), no shadows, 1px blue lines, token colours,
+   Forma DJR optical sizes by type size, no italics in the interface, 44px minimum targets. */
+@font-face{font-family:'Forma DJR Deck';src:url('fonts/FormaDJRDeck-Medium.woff2') format('woff2');font-weight:500;font-display:swap}
+@font-face{font-family:'Forma DJR Deck';src:url('fonts/FormaDJRDeck-Bold.woff2') format('woff2');font-weight:700;font-display:swap}
+:root{ --blue:#1c44ff; --blue-d:#0b2fd9; --tint:#eef1ff; --tint2:#eef1ff; --tint3:#c7d1ff; --line:#1c44ff;
+  --deck:'Forma DJR Deck','Forma DJR Text','Helvetica Neue',Arial,sans-serif }
+body{ background:#fff; word-spacing:normal }
+:focus-visible{ outline:2px solid var(--blue-d); outline-offset:2px }
+.btn:focus-visible,.gc-hot__in:focus-visible,.x-btn:focus-visible{ outline-color:var(--blue-d) }
+.app *, .menu *, .zoom *{ box-shadow:none!important }
+.brand,.rbtn,.btn,.c-link,.c-back,.c-close,.chipl,.badge,.sw,.sw__k,.lg,.lg-btn,.sec-btn,.c-zoom,.toast,.sheet,.gc-hot__in,.gc-chip__in,.c-od__row .micro,.c-item .go,.dots i,.toggle,.toggle button,.toggle::before,.zoom::after,.sheet__handle::before{ border-radius:0!important }
+.micro{ font-size:12px }
+.badge{ width:28px; height:28px; font-family:var(--micro); font-size:12px }
+/* header: project name in Forma DJR Deck, weight makes the hierarchy */
+.brand{ font-family:var(--deck); font-size:22px; letter-spacing:-.01em; gap:.25em }
+.wm-g{ font-family:var(--deck); font-style:normal; font-weight:500 }
+.wm-c{ font-family:var(--deck); font-weight:700 }
+@media (min-width:900px){ .brand{ font-size:26px } }
+/* round buttons become squares with a 1px line */
+.rbtn{ background:#fff; border:1px solid var(--line) }
+.rbtn:hover{ background:var(--tint); color:var(--blue-d) }
+.x-btn{ background:#fff; color:var(--blue); border-color:var(--line) }
+.x-btn:hover{ background:var(--tint); color:var(--blue-d) }
+/* buttons */
+.btn{ min-height:52px; font-weight:700; font-size:16px; padding:0 20px }
+.btn:active{ transform:none }
+.btn--ghost{ font-weight:400 }
+.btn--ghost:hover{ background:var(--tint); color:var(--blue-d); border-color:var(--blue-d) }
+.sheet__nav .btn--grow{ min-height:56px; font-size:18px }
+.btn .nx{ font-size:18px; line-height:24px } .btn .nx small{ font-family:var(--micro); font-size:12px; line-height:16px; opacity:1 }
+.c-link{ min-height:52px; font-size:16px; padding:8px 16px } .c-link small{ font-size:13px; line-height:18px }
+.c-link:hover{ background:var(--tint); color:var(--blue-d) }
+.c-back{ min-height:44px; font-size:15px } .c-back:hover{ background:none; text-decoration:underline; text-underline-offset:3px }
+.chipl{ min-height:44px; min-width:44px; padding:0 12px; font-size:15px; font-weight:400; justify-content:center }
+/* type: Display for titles, Deck for lead and tagline, Text for the rest */
+.c-h1{ font-family:var(--display); font-weight:700; font-size:36px; line-height:38px; letter-spacing:-.015em; word-spacing:normal }
+.c-lede{ font-family:var(--deck); font-weight:500; font-size:22px; line-height:28px; margin:12px 0 8px }
+.c-title{ font-family:var(--display); font-weight:700; font-size:32px; line-height:34px; letter-spacing:-.01em; word-spacing:normal }
+.c-tag{ font-family:var(--deck); font-style:normal; font-weight:500; font-size:20px; line-height:26px; margin-top:6px }
+.c-text{ font-size:16px; line-height:24px } .c-text--s{ font-size:15px; line-height:21px }
+.c-item strong{ font-size:16px; line-height:22px } .c-item span.t{ font-size:15px; line-height:21px }
+.c-items li.is-on .c-item{ background:var(--tint); box-shadow:none!important; outline:8px solid var(--tint) }
+.c-row strong{ font-size:16px; line-height:22px } .c-row span.t{ font-size:13px; line-height:18px }
+.c-hint{ font-size:15px; line-height:21px }
+.c-key p{ font-size:15px; line-height:21px }
+.menu h2{ font-family:var(--deck); font-size:24px; line-height:28px }
+.menu p{ font-size:15px; line-height:21px }
+.menu small{ opacity:1 }
+/* Oggi / Domani as Tags: Oggi with a line, Domani full blue */
+.c-od__row{ font-size:15px; line-height:21px; grid-template-columns:72px 1fr }
+.c-od__row .micro{ height:24px; padding:0 6px; letter-spacing:.08em; border:1px solid var(--line) }
+/* numbers as KPI tiles: tint, 2px white joints, the first one blue */
+.c-facts{ gap:2px; border:0; margin-top:12px }
+.c-facts > div,.c-facts > div + div{ padding:14px; border:0; background:var(--tint) }
+.c-facts > div:first-child{ background:var(--blue); color:#fff }
+.c-facts dt,.c-key .c-facts dt{ font-family:var(--deck); font-weight:700; font-size:26px; line-height:30px }
+.c-facts dd{ margin:2px 0 0; font-size:13px; line-height:18px }
+.c-key section{ padding-top:12px }
+/* figures */
+.c-zoom{ height:44px; padding:0 14px; font-size:15px; font-weight:700; right:0; top:0 }
+.c-sketch figcaption{ font-size:13px; line-height:18px }
+/* map: the switch becomes a Chip with a checkbox, pressed = full blue */
+.sw{ height:44px; padding:0 14px 0 12px; gap:10px; font-size:15px; font-weight:400; border:1px solid var(--line); background:#fff }
+.sw__k{ width:20px; height:20px; border:1.5px solid var(--line); background:#fff }
+.sw__k::after{ content:''; left:5px; top:1px; width:6px; height:11px; border:solid transparent; border-width:0 2px 2px 0; background:none!important; border-radius:0; transform:rotate(45deg)!important }
+.sw[aria-checked="true"]{ background:var(--blue); color:#fff; border-color:var(--blue) }
+.sw[aria-checked="true"] .sw__k{ background:#fff; border-color:#fff }
+.sw[aria-checked="true"] .sw__k::after{ border-color:var(--blue) }
+.sw:hover{ background:var(--tint) } .sw[aria-checked="true"]:hover{ background:var(--blue-d) }
+@media (min-width:900px){ .sw{ height:44px; font-size:15px } }
+/* place names on the map: blue label, white text (MapMarker), hit area 44px */
+.gc-hot__in{ height:auto; min-height:30px; padding:6px 10px; border:0; font-size:13px; line-height:18px; font-weight:700 }
+.gc-hot__in::before{ content:''; position:absolute; inset:-7px -2px }
+.gc-hot__in:hover{ background:var(--blue-d); transform:translate(-50%,-50%) }
+.gc-hot--near .gc-hot__in{ height:auto; min-height:28px; padding:5px 9px; font-size:13px }
+@media (max-width:899px){ [data-mode="home"] .gc-hot:not(.gc-hot--near):not(.gc-hot--txt) .gc-hot__in{ height:auto; padding:4px 8px; font-size:12px; border:0 } }
+@media (max-width:899px){ [data-mode] .gc-hot.gc-hot--txt .gc-hot__in{ font-size:12px; line-height:16px } }
+.gc-chip__in{ border-radius:0 } .gc-chip__in:hover{ background:#fff }
+.gc-st__in{ font-size:12px; letter-spacing:.06em; opacity:1 }
+/* legend: white box with a 1px line, caption type */
+.lg{ padding:12px; font-size:13px; line-height:18px }
+@media (min-width:900px){ .lg{ font-size:13px } }
+.lg .micro{ margin:0 0 8px }
+/* "Vedi la sezione": secondary button on the map */
+.sec-btn{ height:44px; padding:0 16px 0 12px; background:#fff; color:var(--blue); border:1px solid var(--line); font-size:15px; font-weight:700 }
+.sec-btn:hover{ background:var(--tint); color:var(--blue-d) }
+@media (min-width:900px){ .sec-btn{ height:44px; font-size:15px } }
+/* sheet on the phone: square, line on top */
+.sheet{ border-top:1px solid var(--line) }
+.zoom::after{ font-size:13px; padding:8px 12px }
+.c-key .c-facts + p{ margin-top:12px }
+.c-hint{ text-align:left }

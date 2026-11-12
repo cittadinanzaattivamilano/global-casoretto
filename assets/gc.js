@@ -43,11 +43,11 @@ const hot=L.layerGroup().addTo(map);
 const txtL=[];
 for(const p of P){ const txt=!desk.matches&&p.labm&&p.labm[2];
   if(txt){ const A=ll(p.anchor[0],p.anchor[1]);
-    const ln=L.polyline([A,A],{pane:'leads',color:'#1c44ff',weight:1.2,interactive:false}), dt=L.circleMarker(A,{pane:'leads',radius:2.8,color:'#1c44ff',fillColor:'#1c44ff',fillOpacity:1,weight:0,interactive:false});
+    const ln=L.polyline([A,A],{pane:'leads',color:'#1c44ff',weight:1.2,interactive:false}), dt=L.circleMarker(A,{pane:'leads',radius:4,color:'#ffffff',fillColor:'#1c44ff',fillOpacity:1,weight:1.5,interactive:false});
     const m=L.marker(A,{pane:'pins',keyboard:false,icon:L.divIcon({className:'gc-hot gc-hot--txt gc-hot--'+txt,iconSize:null,html:`<button class="gc-hot__in" type="button">${esc(p.name)}</button>`})});
     m.on('click',()=>select(p.id)); hot.addLayer(ln); hot.addLayer(dt); hot.addLayer(m); txtL.push({p,A,ln,m,d:p.labm}); continue; }
   if(Math.hypot(p.lab[0]-p.anchor[0],p.lab[1]-p.anchor[1])>30){ hot.addLayer(L.polyline([ll(p.lab[0],p.lab[1]),ll(p.anchor[0],p.anchor[1])],{pane:'leads',color:'#1c44ff',weight:1.5,interactive:false}));
-    hot.addLayer(L.circleMarker(ll(p.anchor[0],p.anchor[1]),{pane:'leads',radius:3.5,color:'#1c44ff',fillColor:'#1c44ff',fillOpacity:1,weight:0,interactive:false})); }
+    hot.addLayer(L.circleMarker(ll(p.anchor[0],p.anchor[1]),{pane:'leads',radius:5,color:'#ffffff',fillColor:'#1c44ff',fillOpacity:1,weight:2,interactive:false})); }
   const m=L.marker(ll(p.lab[0],p.lab[1]),{pane:'pins',keyboard:false,icon:L.divIcon({className:'gc-hot',iconSize:null,html:`<button class="gc-hot__in" type="button">${esc(p.name)}</button>`})});
   m.on('click',()=>select(p.id)); hot.addLayer(m); }
 function placeTxt(){ if(!txtL.length) return; try{ for(const o of txtL){ const c=map.latLngToContainerPoint(o.A), q=map.containerPointToLatLng(c.add([o.d[0],o.d[1]])); o.m.setLatLng(q); o.ln.setLatLngs([q,o.A]); } }catch(e){} }
@@ -159,14 +159,14 @@ ${p.trees?`<h3 class="micro c-sub">Gli alberi</h3><p class="c-text c-text--s">${
 ${p.pdf?`<h3 class="micro c-sub">Scarica</h3><div class="c-links"><a class="c-link" href="${p.pdf}" download><span>Scarica la tavola<small>PDF · ${p.pdfSize}</small></span>${I.dl}</a></div>`:''}`; }
 function select(id,o={}){ const p=byId[id]; if(!p) return; free(); cur=p; selK=-1; root.dataset.mode='place'; lock(false);
   card.innerHTML=placeHTML(p); const nx=P[(p.i+1)%N];
-  nav.innerHTML=`<button class="btn btn--ghost" data-a="home" aria-label="Torna alla visione d'insieme">${I.out}<span>Insieme</span></button><button class="btn btn--grow" data-a="next"><span class="nx"><small>Prossimo</small>${esc(nx.name)}</span>${I.next}</button>`;
+  nav.innerHTML=`<button class="btn btn--grow" data-a="next"><span class="nx"><small>Prossimo</small>${esc(nx.name)}</span>${I.next}</button>`;
   $('[data-a="home2"]',card).onclick=()=>home();
   $$('.c-zoom',card).forEach(z=>z.addEventListener('click',()=>openZoom(z.dataset.full)));
   $('.x-btn').hidden=false;
   const sb=$('.sec-btn'); sb.hidden=!p.sec||p.id==='largo-gemito'; if(p.sec) sb.onclick=()=>openZoom(p.sec.full);
   $$('button.c-item',card).forEach(b=>b.addEventListener('click',()=>focusItem(p,+b.dataset.k)));
   const fb=$('[data-a="full"]',card); if(fb) fb.onclick=()=>go(p.full,{maxZoom:1});
-  $('[data-a="home"]',nav).onclick=()=>home(); $('[data-a="next"]',nav).onclick=()=>select(nx.id);
+  $('[data-a="next"]',nav).onclick=()=>select(nx.id);
   body.scrollTop=0; history.replaceState(null,'','#'+id); document.title=p.title+' · Global Casoretto';
   requestAnimationFrame(()=>requestAnimationFrame(()=>{ map.invalidateSize(false); if(o.fly!==false) go(p.view,{animate:o.animate}); refresh(); limit(p,(reduce||o.animate===false||o.fly===false)?60:1800); })); }
 function focusItem(p,k,pt,fromMap){ const it=p.items[k]; selK=k; setState('domani');
