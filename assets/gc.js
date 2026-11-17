@@ -157,9 +157,25 @@ ${p.full?`<div class="c-links"><button class="c-link" data-a="full">Vedi tutta l
 ${fig}
 ${p.trees?`<details class="c-acc"><summary><span class="micro">Gli alberi</span><svg class="i c-acc__i" viewBox="0 0 20 20" aria-hidden="true"><path d="M5 8l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></summary><p class="c-text c-text--s">${esc(p.trees.intro)}</p><ul class="c-items">${p.trees.cards.map(t=>`<li><div class="c-item"><strong>${esc(t.title)}</strong><span class="t">${esc(t.text)}</span></div></li>`).join('')}</ul></details>`:''}
 ${p.pdf?`<h3 class="micro c-sub">Scarica</h3><div class="c-links"><a class="c-link" href="${p.pdf}" download><span>Scarica la tavola<small>PDF · ${p.pdfSize}</small></span>${I.dl}</a></div>`:''}`; }
-let fullHold=0; function sheetFull(v){ sheet.classList.toggle('is-full',!!v&&!desk.matches); }
-body.addEventListener('scroll',()=>{ if(desk.matches||root.dataset.mode!=='place') return; const t=body.scrollTop;
-  if(t>12){ if(Date.now()>fullHold) sheetFull(true); } else if(t<=0) sheetFull(false); },{passive:true});
+/* phone: the card is a sheet that follows the finger. Drag it up and it covers the map, then the text scrolls;
+   back at the top of the text, drag it down and the map comes back. */
+let fullHold=0;
+function sheetFull(v){ sheet.style.top=''; sheet.classList.remove('is-drag'); sheet.classList.toggle('is-full',!!v&&!desk.matches); }
+(function(){ let y0=0,yl=0,drag=false,v=0,decided=false;
+  const on=()=>!desk.matches&&root.dataset.mode==='place';
+  const rest=()=>$('.mapwrap').getBoundingClientRect().bottom, top=()=>sheet.getBoundingClientRect().top;
+  sheet.addEventListener('touchstart',ev=>{ if(!on()||ev.touches.length>1) return; y0=yl=ev.touches[0].clientY; drag=false; decided=false; v=0; },{passive:true});
+  sheet.addEventListener('touchmove',ev=>{ if(!on()) return; const y=ev.touches[0].clientY, dy=y-yl; yl=y; v=dy;
+    if(!decided){ if(Math.abs(y-y0)<6) return; decided=true; const up=y<y0, full=sheet.classList.contains('is-full');
+      drag = full ? (!up && body.scrollTop<=0) : (up || body.scrollTop<=0);
+      if(drag) sheet.classList.add('is-drag'); }
+    if(!drag) return;
+    ev.preventDefault(); sheet.style.top=Math.min(rest(),Math.max(0,top()+dy))+'px'; },{passive:false});
+  const end=()=>{ if(!drag) return; drag=false; const r=rest(), t=top();
+    const full = v<-2 ? true : v>2 ? false : t<r/2;
+    sheet.classList.remove('is-drag'); sheet.style.top=''; sheet.classList.toggle('is-full',full); if(!full) body.scrollTop=0; };
+  sheet.addEventListener('touchend',end); sheet.addEventListener('touchcancel',end);
+})();
 function select(id,o={}){ const p=byId[id]; if(!p) return; free(); cur=p; selK=-1; root.dataset.mode='place'; lock(false); sheetFull(false); body.scrollTop=0;
   card.innerHTML=placeHTML(p); const nx=P[(p.i+1)%N];
   nav.innerHTML=`<button class="btn btn--grow" data-a="next"><span class="nx"><small>Prossimo</small>${esc(nx.name)}</span>${I.next}</button>`;

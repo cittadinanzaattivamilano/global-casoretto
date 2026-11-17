@@ -410,8 +410,10 @@ body{ background:#fff; word-spacing:normal }
 .c-acc .c-items li:last-child .c-item{ border-bottom:0 }
 /* phone: the card covers the map while you read */
 @media (max-width:899px){
-  .sheet{ transition:height .3s var(--ease) }
-  [data-mode="place"] .sheet.is-full{ --sh:100dvh; border-top:0; padding-top:env(safe-area-inset-top) }
+  [data-mode="place"] .sheet{ top:44dvh; bottom:0; height:auto!important; max-height:none!important; transition:top .3s var(--ease) }
+  [data-mode="place"] .sheet.is-full{ top:0; border-top:0; padding-top:env(safe-area-inset-top) }
+  [data-mode="place"] .sheet.is-drag{ transition:none }
+  [data-mode="place"] .sheet__body{ overscroll-behavior:contain }
 }
 /* the section / sketch is shown in the card on the phone too */
 .sheet .c-sketch{ display:block!important } .sheet .c-sketch img{ height:auto!important; object-fit:initial } .sheet .c-sketch figcaption{ display:block!important }
