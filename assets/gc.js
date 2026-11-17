@@ -127,7 +127,7 @@ const homeB=()=>D.home;
 
 /* ---------- cards ---------- */
 function openZoom(src){ const d=$('#zoom'), im=$('img',d); im.src=src; im.classList.remove('is-big'); d.showModal(); history.pushState({gcZoom:1},'',location.href); }
-function home(o={}){ free(); if(!desk.matches&&state!=='domani') setState('domani'); $('.sec-btn').hidden=true; $('.x-btn').hidden=true; cur=null; selK=-1; root.dataset.mode='home'; lock(true); document.title='Global Casoretto · come potrebbe cambiare il quartiere';
+function home(o={}){ free(); sheetFull(false); if(!desk.matches&&state!=='domani') setState('domani'); $('.sec-btn').hidden=true; $('.x-btn').hidden=true; cur=null; selK=-1; root.dataset.mode='home'; lock(true); document.title='Global Casoretto · come potrebbe cambiare il quartiere';
   card.innerHTML=`<p class="micro c-kick">Una visione per il quartiere · Milano, Municipio 3</p><h1 class="c-h1">${esc(D.intro.t)}</h1><p class="c-lede">${esc(D.intro.p)}</p>
 <div class="c-key">
 <section><h2 class="micro">Più alberi</h2><dl class="c-facts" style="--n:2"><div><dt>380</dt><dd>nuovi alberi, circa</dd></div><div><dt>600</dt><dd>alberi che ci sono già, tutti conservati</dd></div></dl>
@@ -144,24 +144,27 @@ function placeHTML(p){
   const facts=p.facts.map(f=>`<div><dt>${esc(f[0])}</dt><dd>${esc(f[1])}</dd></div>`).join('');
   const items=p.items.map((it,k)=>{ const has=it.pts&&it.pts.length; const inner=`<strong>${esc(it.chip||it.title)}</strong><span class="t">${esc(it.text)}</span>`;
     return `<li id="it-${k}">${has?`<button class="c-item" data-k="${k}" aria-label="${esc(it.chip||it.title)}: mostra sulla mappa">${inner}</button>`:`<div class="c-item">${inner}</div>`}</li>`; }).join('');
-  const fig=p.sec?`<figure class="c-sketch"><img src="${p.sec.src}" width="${p.sec.w}" height="${p.sec.h}" alt="Sezione della strada, oggi e con il progetto" loading="lazy"><button class="c-zoom" type="button" data-full="${p.sec.full}">Apri a schermo intero</button><figcaption>La sezione della strada: oggi e con il progetto</figcaption></figure>`
-    :p.sketch?`<figure class="c-sketch"><img src="${p.sketch.src}" width="${p.sketch.w}" height="${p.sketch.h}" alt="Disegno: ${esc(p.sketch.cap)}" loading="lazy"><button class="c-zoom" type="button" data-full="${p.sketch.full}">Apri a schermo intero</button><figcaption>${esc(p.sketch.cap)}</figcaption></figure>`:'';
+  const fig=p.sec?`<figure class="c-sketch"><img src="${p.sec.src}" width="${p.sec.w}" height="${p.sec.h}" alt="Sezione della strada, oggi e con il progetto" loading="lazy"><figcaption><span>La sezione della strada: oggi e con il progetto</span><button class="c-zoom" type="button" data-full="${p.sec.full}">${I.out}<span>Schermo intero</span></button></figcaption></figure>`
+    :p.sketch?`<figure class="c-sketch"><img src="${p.sketch.src}" width="${p.sketch.w}" height="${p.sketch.h}" alt="Disegno: ${esc(p.sketch.cap)}" loading="lazy"><figcaption><span>${esc(p.sketch.cap)}</span><button class="c-zoom" type="button" data-full="${p.sketch.full}">${I.out}<span>Schermo intero</span></button></figcaption></figure>`:'';
   return `<button class="c-back" type="button" data-a="home2">${I.prev}Tutti gli interventi</button>
 <p class="micro c-kick">${esc(p.cat)} · ${p.i+1} di ${N}</p>
 <h2 class="c-title">${esc(p.title)}</h2><p class="c-tag">${esc(p.tag)}</p>
-<div class="c-od"><div class="c-od__row"><span class="micro">Oggi</span><span>${esc(p.oggi)}</span></div><div class="c-od__row"><span class="micro">Domani</span><span>${esc(p.domani)}</span></div></div>
+<p class="c-text c-intro">${esc(p.domani)}</p>
 <dl class="c-facts" style="--n:${p.facts.length}">${facts}</dl>
 ${p.full?`<div class="c-links"><button class="c-link" data-a="full">Vedi tutta la via ${I.out}</button></div>`:''}
 <div class="c-lg"><h3 class="micro c-sub">Legenda</h3><div class="lg lg--card">${$('#lg').innerHTML}</div></div>
 <h3 class="micro c-sub">Cosa trovi</h3><ul class="c-items">${items}</ul>
 ${fig}
-${p.trees?`<h3 class="micro c-sub">Gli alberi</h3><p class="c-text c-text--s">${esc(p.trees.intro)}</p><ul class="c-items">${p.trees.cards.map(t=>`<li><div class="c-item"><strong>${esc(t.title)}</strong><span class="t">${esc(t.text)}</span></div></li>`).join('')}</ul>`:''}
+${p.trees?`<details class="c-acc"><summary><span class="micro">Gli alberi</span><svg class="i c-acc__i" viewBox="0 0 20 20" aria-hidden="true"><path d="M5 8l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></summary><p class="c-text c-text--s">${esc(p.trees.intro)}</p><ul class="c-items">${p.trees.cards.map(t=>`<li><div class="c-item"><strong>${esc(t.title)}</strong><span class="t">${esc(t.text)}</span></div></li>`).join('')}</ul></details>`:''}
 ${p.pdf?`<h3 class="micro c-sub">Scarica</h3><div class="c-links"><a class="c-link" href="${p.pdf}" download><span>Scarica la tavola<small>PDF · ${p.pdfSize}</small></span>${I.dl}</a></div>`:''}`; }
-function select(id,o={}){ const p=byId[id]; if(!p) return; free(); cur=p; selK=-1; root.dataset.mode='place'; lock(false);
+let fullHold=0; function sheetFull(v){ sheet.classList.toggle('is-full',!!v&&!desk.matches); }
+body.addEventListener('scroll',()=>{ if(desk.matches||root.dataset.mode!=='place') return; const t=body.scrollTop;
+  if(t>12){ if(Date.now()>fullHold) sheetFull(true); } else if(t<=0) sheetFull(false); },{passive:true});
+function select(id,o={}){ const p=byId[id]; if(!p) return; free(); cur=p; selK=-1; root.dataset.mode='place'; lock(false); sheetFull(false); body.scrollTop=0;
   card.innerHTML=placeHTML(p); const nx=P[(p.i+1)%N];
   nav.innerHTML=`<button class="btn btn--grow" data-a="next"><span class="nx"><small>Prossimo</small>${esc(nx.name)}</span>${I.next}</button>`;
   $('[data-a="home2"]',card).onclick=()=>home();
-  $$('.c-zoom',card).forEach(z=>z.addEventListener('click',()=>openZoom(z.dataset.full)));
+  $$('.c-zoom',card).forEach(z=>{ z.addEventListener('click',()=>openZoom(z.dataset.full)); const im=z.closest('figure').querySelector('img'); im.style.cursor='zoom-in'; im.addEventListener('click',()=>openZoom(z.dataset.full)); });
   $('.x-btn').hidden=false;
   const sb=$('.sec-btn'); sb.hidden=!p.sec||p.id==='largo-gemito'; if(p.sec) sb.onclick=()=>openZoom(p.sec.full);
   $$('button.c-item',card).forEach(b=>b.addEventListener('click',()=>focusItem(p,+b.dataset.k)));
@@ -169,7 +172,7 @@ function select(id,o={}){ const p=byId[id]; if(!p) return; free(); cur=p; selK=-
   $('[data-a="next"]',nav).onclick=()=>select(nx.id);
   body.scrollTop=0; history.replaceState(null,'','#'+id); document.title=p.title+' · Global Casoretto';
   requestAnimationFrame(()=>requestAnimationFrame(()=>{ map.invalidateSize(false); if(o.fly!==false) go(p.view,{animate:o.animate}); refresh(); limit(p,(reduce||o.animate===false||o.fly===false)?60:1800); })); }
-function focusItem(p,k,pt,fromMap){ const it=p.items[k]; selK=k; setState('domani');
+function focusItem(p,k,pt,fromMap){ sheetFull(false); fullHold=Date.now()+1200; const it=p.items[k]; selK=k; setState('domani');
   $$('.c-items li',card).forEach(li=>li.classList.toggle('is-on',li.id==='it-'+k));
   const li=$('#it-'+k,card); if(li&&fromMap) li.scrollIntoView({block:'center',behavior:reduce?'auto':'smooth'});
   if(!fromMap){ pt=pt||it.pts[0]; const r=38; go([pt[0]-r,pt[1]-r,pt[0]+r,pt[1]+r],{maxZoom:2.5}); }

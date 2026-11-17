@@ -396,3 +396,28 @@ body{ background:#fff; word-spacing:normal }
 .zoom::after{ font-size:13px; padding:8px 12px }
 .c-hint{ text-align:left }
 .c-lede{ line-height:24px } .c-tag{ line-height:24px }
+
+/* intervention text: one paragraph, what it is and what it will be */
+.c-intro{ margin:14px 0 0; padding-top:12px; border-top:1px solid var(--line) }
+/* accordion (Gli alberi), closed by default */
+.c-acc{ margin-top:22px; border-top:1px solid var(--line); border-bottom:1px solid var(--line) }
+.c-acc summary{ list-style:none; display:flex; align-items:center; justify-content:space-between; min-height:48px; cursor:pointer }
+.c-acc summary::-webkit-details-marker{ display:none }
+.c-acc summary:hover{ color:var(--blue-d) }
+.c-acc__i{ transition:transform .25s var(--ease) }
+.c-acc[open] .c-acc__i{ transform:rotate(180deg) }
+.c-acc > p{ margin-top:0 }
+.c-acc .c-items li:last-child .c-item{ border-bottom:0 }
+/* phone: the card covers the map while you read */
+@media (max-width:899px){
+  .sheet{ transition:height .3s var(--ease) }
+  [data-mode="place"] .sheet.is-full{ --sh:100dvh; border-top:0; padding-top:env(safe-area-inset-top) }
+}
+/* the section / sketch is shown in the card on the phone too */
+.sheet .c-sketch{ display:block!important } .sheet .c-sketch img{ height:auto!important; object-fit:initial } .sheet .c-sketch figcaption{ display:block!important }
+
+/* full-screen button under the drawing, so it never covers it */
+.sheet .c-sketch figcaption{ display:flex!important; align-items:center; justify-content:space-between; gap:12px; padding:0 0 0 12px }
+.c-zoom{ position:static!important; flex-shrink:0; display:inline-flex; align-items:center; gap:8px; height:44px; padding:0 14px; border:0; border-left:1px solid var(--line); background:#fff; color:var(--blue); font-size:15px; font-weight:700 }
+.c-zoom:hover{ background:var(--tint); color:var(--blue-d) }
+.c-zoom svg.i{ width:18px; height:18px }
